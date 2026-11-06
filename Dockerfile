@@ -1,60 +1,31 @@
-FROM dunglas/frankenphp:1-php8.4-bookworm AS base
-
-RUN cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" \
-    && install-php-extensions intl zip pdo_pgsql opcache
-
+FROM composer:2 AS vendor
 WORKDIR /app
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-scripts --optimize-autoloader
 
 FROM node:22-alpine AS assets
-
-WORKDIR /build
-
+WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
-
 COPY vite.config.js ./
 COPY resources ./resources
 RUN npm run build
 
-FROM base AS dependencies
+FROM dunglas/frankenphp:latest-php8.4
+RUN install-php-extensions pdo_pgsql intl zip opcache
 
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-COPY composer.json composer.lock ./
-RUN composer install \
-    --no-dev \
-    --no-interaction \
-    --no-progress \
-    --no-scripts \
-    --optimize-autoloader \
-    --prefer-dist
+WORKDIR /app
 
+COPY --from=vendor /app/vendor ./vendor
+COPY --from=assets /app/public/build ./public/build
 COPY . .
-COPY --from=assets /build/public/build ./public/build
 
-RUN mkdir -p \
-        storage/framework/cache/data \
-        storage/framework/sessions \
-        storage/framework/views \
-        storage/logs \
-        bootstrap/cache \
-    && composer dump-autoload --no-dev --classmap-authoritative
+RUN mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache
+RUN chown -R www-data:www-data .
 
-FROM base AS runtime
+ENV APP_ENV=production
+ENV LOG_CHANNEL=stderr
 
-COPY --from=dependencies --chown=www-data:www-data /app /app
-COPY --chown=www-data:www-data Caddyfile /etc/frankenphp/Caddyfile
+EXPOSE 80
 
-RUN setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/frankenphp \
-    && chown -R www-data:www-data /config/caddy /data/caddy
-
-ENV PORT=80 \
-    APP_ENV=production \
-    APP_DEBUG=false \
-    LOG_CHANNEL=stderr \
-    SESSION_DRIVER=database \
-    CACHE_STORE=database \
-    QUEUE_CONNECTION=sync
-
-USER www-data
-
-CMD ["frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile"]
+CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=80
