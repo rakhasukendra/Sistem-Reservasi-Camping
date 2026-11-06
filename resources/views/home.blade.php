@@ -126,7 +126,7 @@
     <div class="features-grid">
         <div class="feature-item">
             <div class="feature-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="48" height="48">
                     <path d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068"/>
                 </svg>
             </div>
@@ -135,7 +135,7 @@
         </div>
         <div class="feature-item">
             <div class="feature-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="48" height="48">
                     <path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0"/>
                 </svg>
             </div>
@@ -182,7 +182,7 @@
     </ol>
     <div class="booking-guide-action">
         <a href="#alat" class="button">Pilih perlengkapan</a>
-        <span class="small-note">Belum punya akun? <a href="{{ route('register') }}" class="text-link">Daftar sebagai penyewa</a></span>
+        <span class="small-note">Belum punya akun? <a href="{{ route('register') }}" style="color:#0066cc;font-weight:600">Daftar sebagai penyewa</a></span>
     </div>
 </section>
 @endif
