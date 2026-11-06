@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Flow - User, Staff, Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0f1419;
+            color: #e6edf3;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: #58a6ff;
+            text-align: center;
+        }
+        .subtitle {
+            font-size: 1.1rem;
+            color: #8b949e;
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+        .role-section {
+            background: #161b22;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid;
+        }
+        .role-section.user { border-color: #238636; }
+        .role-section.staff { border-color: #8957e5; }
+        .role-section.admin { border-color: #da3633; }
+        
+        .role-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-user { background: #238636; color: white; }
+        .badge-staff { background: #8957e5; color: white; }
+        .badge-admin { background: #da3633; color: white; }
+        
+        .role-title {
+            font-size: 1.8rem;
+            color: #e6edf3;
+        }
+        
+        .flow-diagram {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+        
+        .flow-step {
+            display: flex;
+            align-items: center;
+            margin: 1rem 0;
+            gap: 1rem;
+        }
+        
+        .step-number {
+            min-width: 40px;
+            height: 40px;
+            background: #58a6ff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #0d1117;
+        }
+        
+        .step-content {
+            flex: 1;
+            background: #161b22;
+            padding: 1rem;
+            border-radius: 6px;
+            border-left: 3px solid #58a6ff;
+        }
+        
+        .step-label {
+            font-weight: 600;
+            color: #58a6ff;
+            margin-bottom: 0.25rem;
+        }
+        
+        .step-detail {
+            color: #8b949e;
+            font-size: 0.95rem;
+        }
+        
+        .arrow {
+            text-align: center;
+            color: #58a6ff;
+            font-size: 1.5rem;
+            margin: 0.5rem 0;
+        }
+        
+        .access-list {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .access-card {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 1.5rem;
+        }
+        
+        .access-title {
+            font-weight: 600;
+            color: #58a6ff;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+        
+        .access-list ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .access-list li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #21262d;
+            color: #c9d1d9;
+        }
+        
+        .access-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .access-list li strong {
+            color: #58a6ff;
+        }
+        
+        .check { color: #238636; margin-right: 0.5rem; }
+        .cross { color: #da3633; margin-right: 0.5rem; }
+        
+        .security-note {
+            background: #1c2128;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 1.5rem;
+            margin-top: 3rem;
+        }
+        
+        .security-note h3 {
+            color: #f85149;
+            margin-bottom: 1rem;
+        }
+        
+        .security-note ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .security-note li {
+            padding: 0.5rem 0;
+            color: #c9d1d9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Login Flow Diagram</h1>
+        <p class="subtitle">Alur login untuk 3 role berbeda dalam sistem reservasi camping</p>
+
+        <!-- USER ROLE -->
+        <div class="role-section user">
+            <div class="role-header">
+                <span class="badge badge-user">USER</span>
+                <h2 class="role-title">Customer Role</h2>
+            </div>
+            
+            <div class="flow-diagram">
+                <h3 style="color: #238636; margin-bottom: 1.5rem;">Login Flow</h3>
+                
+                <div class="flow-step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <div class="step-label">Akses Halaman Login</div>
+                        <div class="step-detail">GET /masuk → Form login tampil</div>
+                    </div>
+                </div>
+                
+                <div class="arrow">↓</div>
+                
+                <div class="flow-step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <div class="step-label">Submit Credentials</div>
+                        <div class="step-detail">POST /masuk dengan email + password → Throttle: 10 attempts/min</div>
+                    </div>
+                </div>
+                
+                <div class="arrow">↓</div>
+                
+                <div class="flow-step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <div class="step-label">Authentication</div>
+                        <div class="step-detail">Auth::attempt() verify credentials di database → Check password hash (bcrypt)</div>
+                    </div>
+                </div>
+                
+                <div class="arrow">↓</div>
+                
+                <div class="flow-step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <div class="step-label">Session Created</div>
+                        <div class="step-detail">Session regenerate untuk security → Role: user</div>
+                    </div>
+                </div>
+                
+                <div class="arrow">↓</div>
+                
+                <div class="flow-step">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <div class="step-label">Redirect ke Profile</div>
+                        <div class="step-detail">Redirect /profil → User dashboard</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="access-list">
+                <div class="access-card">
+                    <div class="access-title">✅ Akses Yang Diizinkan</div>
+                    <ul>
+                        <li><span class="check">✓</span> <strong>/profil</strong> - Lihat profil & history booking</li>
+                        <li><span class="check">✓</span> <strong>/reservasi-saya</strong> - Daftar reservasi saya</li>
+                        <li><span class="check">✓</span> <strong>/keranjang</strong> - Shopping cart untuk items</li>
+                        <li><span class="check">✓</span> <strong>/reservasi/buat</strong> - Buat booking baru</li>
+                        <li><span class="check">✓</span> <strong>/reservasi/{id}/batal</strong> - Batalkan booking</li>
+                    </ul>
+                </div>
+                
+                <div class="access-card">
+                    <div class="access-title">❌ Tidak Bisa Akses</div>
+                    <ul>
+                        <li><span class="cross">✗</span> <strong>/staff/*</strong> - Inventory management (403 Forbidden)</li>
+                        <li><span class="cross">✗</span> <strong>/admin/*</strong> - User management (403 Forbidden)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- STAFF ROLE -->
+        <div class="role-section staff">
+            <div class="role-header">
+                <span class="badge badge-staff">STAFF</span>
+                <h2 class="role-title">Staff Role</h2>
+            </div>
+            
+            <div class="flow-diagram">
+                <h3 style="color: #8957e5; margin-bottom: 1.5rem;">Login Flow</h3>
+                
+                <div class="flow-step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <div class="step-label">Akses Halaman Login</div>
+                        <div class="step-detail">GET /masuk → Form login tampil</div>
+                    </div>
+                </div>
+                
+                <div class="arrow">↓</div>
+                
+                <div class="flow-step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <div class="step-label">Submit Credentials</div>
+                        <div class="step-detail">POST /masuk dengan email + password → Throttle: 10 attempts/min</div>
+                    </div>
+                </div>
+                
+                <div class="arrow">↓</div>
+                
+                <div class="flow-step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <div class="step-label">Authentication</div>
+                        <div class="step-detail">Auth::attempt() verify credentials di database → Check password hash (bcrypt)</div>
+                    </div>
+                </div>
+                
+                <div class="arrow">↓</div>
+                
+                <div class="flow-step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <div class="step-label">Session Created</div>
+                        <div class="step-detail">Session regenerate untuk security → Role: staff</div>
+                    </div>
+                </div>
+                
+                <div class="arrow">↓</div>
+                
+                <div class="flow-step">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <div class="step-label">Redirect ke Profile & Staff Panel</div>
+                        <div class="step-detail">Redirect /profil → Akses /staff/dashboard</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="access-list">
+                <div class="access-card">
+                    <div class="access-title">✅ Akses Yang Diizinkan</div>
+                    <ul>
+                        <li><span class="check">✓</span> <strong>/staff/sewa</strong> - Kelola rental & booking</li>
+                        <li><span class="check">✓</span> <strong>/staff/stok</strong> - Inventory management</li>
+                        <li><span class="check">✓</span> <strong>/staff/artikel</strong> - Create/edit articles</li>
+                        <li><span class="check">✓</span> <strong>/staff/dashboard</strong> - Analytics dashboard</li>
+                        <li><span class="check">✓</span> <strong>/staff/alat</strong> - Equipment management</li>
+                    </ul>
+                </div>
+                
+                <div class="access-card">
+                    <div class="access-title">❌ Tidak Bisa Akses</div>
+                    <ul>
+                        <li><span class="cross">✗</span> <strong>/admin/akun</strong> - User management (403 Forbidden)</li>
+                        <li><span class="cross">✗</span> <strong>/admin/penilaian-staff</strong> - Staff assessment (403 Forbidden)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADMIN ROLE -->
+        <div class="role-section admin">
+            <div class="role-header">
+                <span class="badge badge-admin">ADMIN</span>
+                <h2 class="role-title">Admin Role</h2>
+            </div>
+            
+            <div class="flow-diagram">
+                <h3 style="color: #da3633; margin-bottom: 1.5rem;">Login Flow</h3>
+                
+                <div class="flow-step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <div class="step-label">Akses Halaman Login</div>
+                        <div class="step-detail">GET /masuk → Form login tampil</div>
+                    </div>
+                </div>
+                
+                <div class="arrow">↓</div>
+                
+                <div class="flow-step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <div class="step-label">Submit Credentials</div>
+                        <div class="step-detail">POST /masuk dengan email + password → Throttle: 10 attempts/min</div>
+                    </div>
+                </div>
+                
+                <div class="arrow">↓</div>
+                
+                <div class="flow-step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <div class="step-label">Authentication</div>
+                        <div class="step-detail">Auth::attempt() verify credentials di database → Check password hash (bcrypt)</div>
+                    </div>
+                </div>
+                
+                <div class="arrow">↓</div>
+                
+                <div class="flow-step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <div class="step-label">Session Created</div>
+                        <div class="step-detail">Session regenerate untuk security → Role: admin</div>
+                    </div>
+                </div>
+                
+                <div class="arrow">↓</div>
+                
+                <div class="flow-step">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <div class="step-label">Full Access Dashboard</div>
+                        <div class="step-detail">Redirect /profil → Akses semua staff + admin panel</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="access-list">
+                <div class="access-card">
+                    <div class="access-title">✅ Akses Yang Diizinkan - FULL ACCESS</div>
+                    <ul>
+                        <li><span class="check">✓</span> <strong>Staff Panel:</strong> /staff/sewa, /staff/stok, /staff/artikel, /staff/dashboard, /staff/alat</li>
+                        <li><span class="check">✓</span> <strong>Admin Panel:</strong> /admin/akun (user management)</li>
+                        <li><span class="check">✓</span> <strong>/admin/penilaian-staff</strong> - Assess staff performance</li>
+                        <li><span class="check">✓</span> <strong>Profile page:</strong> Lihat semua users + audit logs (30 recent)</li>
+                        <li><span class="check">✓</span> <strong>POST /admin/akun</strong> - Create user</li>
+                        <li><span class="check">✓</span> <strong>PUT /admin/akun/{user}</strong> - Update user</li>
+                        <li><span class="check">✓</span> <strong>DELETE /admin/akun/{user}</strong> - Delete user</li>
+                        <li><span class="check">✓</span> <strong>POST /admin/staff/{staff}/nilai</strong> - Assess staff</li>
+                    </ul>
+                </div>
+                
+                <div class="access-card">
+                    <div class="access-title">⚠️ Pembatasan Admin</div>
+                    <ul>
+                        <li><span class="cross">✗</span> <strong>Tidak bisa delete last admin</strong> - Sistem membutuhkan minimal 1 admin</li>
+                        <li><span class="check">✓</span> <strong>Audit logs:</strong> Semua aksi admin dicatat di AuditLog table</li>
+                        <li><span class="check">✓</span> <strong>Password confirmation:</strong> Update profil & delete account perlu password</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECURITY NOTE -->
+        <div class="security-note">
+            <h3>🔒 Security & Middleware</h3>
+            <ul>
+                <li><strong>Guest Middleware:</strong> Route /masuk dan /daftar - tolak akses jika sudah login</li>
+                <li><strong>Auth Middleware:</strong> Semua protected routes - wajib login untuk akses</li>
+                <li><strong>Role Middleware:</strong> Check role user setelah login
+                    <ul style="margin-left: 2rem; margin-top: 0.5rem;">
+                        <li>• User routes: middleware('role:user')</li>
+                        <li>• Staff routes: middleware('role:staff,admin') - admin juga bisa akses</li>
+                        <li>• Admin routes: middleware('role:admin') - hanya admin</li>
+                    </ul>
+                </li>
+                <li><strong>Rate Limiting:</strong>
+                    <ul style="margin-left: 2rem; margin-top: 0.5rem;">
+                        <li>• Login: 10 attempts per menit</li>
+                        <li>• Register: 5 attempts per menit</li>
+                        <li>• Availability check: 30 per menit</li>
+                    </ul>
+                </li>
+                <li><strong>Password Security:</strong> Bcrypt hash (Hash::make)</li>
+                <li><strong>Session:</strong> Regenerate setelah login sukses</li>
+                <li><strong>CSRF Protection:</strong> Token validation di semua POST/PUT/DELETE request</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
