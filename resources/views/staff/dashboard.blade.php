@@ -118,23 +118,9 @@
 
         <form method="get" action="{{ route('staff.dashboard') }}" style="display:flex;align-items:end;gap:12px;flex-wrap:wrap;margin:16px 0">
             <div class="field">
-                <label for="booking-period">Periode</label>
-                <select id="booking-period" name="period" onchange="this.form.submit()">
-                    <option value="daily" @selected($period === 'daily')>Harian</option>
-                    <option value="monthly" @selected($period === 'monthly')>Bulanan</option>
-                </select>
+                <label for="booking-month">Bulan mulai sewa</label>
+                <input id="booking-month" name="month" type="month" value="{{ $month }}">
             </div>
-            @if($period === 'daily')
-                <div class="field">
-                    <label for="booking-day">Tanggal mulai sewa</label>
-                    <input id="booking-day" name="day" type="date" value="{{ $day }}">
-                </div>
-            @else
-                <div class="field">
-                    <label for="booking-month">Bulan mulai sewa</label>
-                    <input id="booking-month" name="month" type="month" value="{{ $month }}">
-                </div>
-            @endif
             <button class="button secondary small" type="submit">Tampilkan</button>
         </form>
 
