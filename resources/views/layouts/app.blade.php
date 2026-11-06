@@ -114,7 +114,11 @@
             <ul>
                 <li><a href="{{ route('home') }}#alat">Katalog alat</a></li>
                 <li><a href="{{ route('home') }}#panduan">Panduan camping</a></li>
-                @auth<li><a href="{{ route('cart') }}">Keranjang</a></li>@endauth
+                @auth
+                    @if (! in_array(auth()->user()->role, ['admin', 'staff'], true))
+                        <li><a href="{{ route('cart') }}">Keranjang</a></li>
+                    @endif
+                @endauth
             </ul>
         </div>
         <div>
