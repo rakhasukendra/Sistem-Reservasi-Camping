@@ -108,7 +108,7 @@ class StaffController extends Controller
             if ($data['decision'] === 'approved') {
                 $booking->update([
                     'status' => 'cancelled',
-                    'cancellation_review_note' => $data['reason'] ?: 'Pembatalan disetujui oleh staf.',
+                    'cancellation_review_note' => ($data['reason'] ?? null) ?: 'Pembatalan disetujui oleh staf.',
                     'refund_note' => $booking->refund_note ?? 'Catatan refund diperbarui oleh staf.',
                     'deposit_note' => 'Pengembalian deposit dicatat untuk diperiksa staf.',
                 ]);
@@ -117,7 +117,7 @@ class StaffController extends Controller
                 $booking->update([
                     'status' => $booking->previous_booking_status ?? 'approved',
                     'cancellation_requested_at' => null,
-                    'cancellation_review_note' => $data['reason'] ?: 'Ajuan pembatalan ditolak oleh staf.',
+                    'cancellation_review_note' => ($data['reason'] ?? null) ?: 'Ajuan pembatalan ditolak oleh staf.',
                     'cancel_reason' => null,
                 ]);
                 $action = 'booking.cancellation_rejected';
