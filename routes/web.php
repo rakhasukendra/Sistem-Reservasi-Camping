@@ -51,6 +51,7 @@ Route::prefix('staff')->name('staff.')->middleware(['auth', 'role:staff,admin'])
     Route::put('/alat/{item}', [StaffController::class, 'saveItem'])->name('items.update');
     Route::delete('/alat/{item}', [StaffController::class, 'deleteItem'])->name('items.destroy');
     Route::post('/artikel', [StaffController::class, 'saveArticle'])->name('articles.store');
+    Route::get('/artikel/{article}/edit', [StaffController::class, 'editArticle'])->name('articles.edit');
     Route::put('/artikel/{article}', [StaffController::class, 'saveArticle'])->name('articles.update');
     Route::delete('/artikel/{article}', [StaffController::class, 'deleteArticle'])->name('articles.destroy');
 });

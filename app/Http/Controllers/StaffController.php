@@ -60,6 +60,11 @@ class StaffController extends Controller
         return view('staff.articles', compact('articles'));
     }
 
+    public function editArticle(Article $article): View
+    {
+        return view('staff.edit-article', compact('article'));
+    }
+
     public function analytics(): View
     {
         $period = request('period', 'month') === 'year' ? 'year' : 'month';

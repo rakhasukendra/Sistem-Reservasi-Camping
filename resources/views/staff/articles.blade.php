@@ -77,55 +77,7 @@
                             </span>
                         </div>
                         <p style="font-size:13px;color:var(--muted);margin:0 0 12px;line-height:1.5">{{ Str::limit($article->excerpt, 100) }}</p>
-                        <button class="button secondary small" type="button" onclick="toggleArticleEdit('article-edit-{{ $article->id }}')" style="width:100%">Edit</button>
-
-                        <div id="article-edit-{{ $article->id }}" style="display:none;margin-top:16px;padding-top:16px;border-top:2px solid var(--line)">
-                            <form class="form-grid" method="post" action="{{ route('staff.articles.update', $article) }}" enctype="multipart/form-data">
-                                @csrf 
-                                @method('PUT')
-                                @if($article->imageUrl())
-                                    <div style="grid-column:1/-1">
-                                        <img src="{{ $article->imageUrl() }}" alt="{{ $article->title }}" style="display:block;width:100%;max-width:260px;height:auto;border-radius:8px">
-                                        <p class="small-note" style="margin:6px 0 0">Gambar saat ini. Unggah file baru atau isi URL untuk menggantinya.</p>
-                                    </div>
-                                @endif
-                                <div class="field" style="grid-column:1/-1">
-                                    <label for="article-title-{{ $article->id }}">Judul</label>
-                                    <input id="article-title-{{ $article->id }}" name="title" value="{{ $article->title }}" required maxlength="180">
-                                </div>
-                                <div class="field" style="grid-column:1/-1">
-                                    <label for="article-excerpt-{{ $article->id }}">Ringkasan</label>
-                                    <textarea id="article-excerpt-{{ $article->id }}" name="excerpt" required maxlength="300" rows="2">{{ $article->excerpt }}</textarea>
-                                </div>
-                                <div class="field" style="grid-column:1/-1">
-                                    <label for="article-content-{{ $article->id }}">Konten</label>
-                                    <textarea id="article-content-{{ $article->id }}" name="content" required maxlength="12000" rows="6">{{ $article->content }}</textarea>
-                                </div>
-                                <div class="field" style="grid-column:1/-1">
-                                    <label for="article-image-{{ $article->id }}">Ganti gambar panduan (opsional)</label>
-                                    <input id="article-image-{{ $article->id }}" type="file" name="image_file" accept="image/jpeg,image/png,image/webp">
-                                    <p class="small-note" style="margin:0">Format JPG, PNG, atau WEBP, maksimal 10 MB. Foto besar diperkecil otomatis sebelum diunggah.</p>
-                                    <p class="small-note image-note" style="margin:0;color:var(--forest)"></p>
-                                </div>
-                                <div class="field" style="grid-column:1/-1">
-                                    <label for="article-image-url-{{ $article->id }}">Atau ganti dengan URL gambar (opsional)</label>
-                                    <input id="article-image-url-{{ $article->id }}" type="url" name="image_url" maxlength="2048" placeholder="https://contoh.com/gambar-panduan.jpg">
-                                </div>
-                                <label style="grid-column:1/-1">
-                                    <input type="checkbox" name="is_published" value="1" @checked($article->is_published)> 
-                                    Publikasikan artikel
-                                </label>
-                                <div style="grid-column:1/-1;display:flex;gap:8px">
-                                    <button class="button secondary small" type="submit">Simpan</button>
-                                    <button class="button secondary small" type="button" onclick="toggleArticleEdit('article-edit-{{ $article->id }}')">Batal</button>
-                                </div>
-                            </form>
-                            <form method="post" action="{{ route('staff.articles.destroy', $article) }}" onsubmit="return confirm('Hapus artikel ini?')" style="margin-top:12px">
-                                @csrf 
-                                @method('DELETE')
-                                <button class="text-link" type="submit" style="border:0;background:none;color:#8b3b2d;font-size:13px">Hapus artikel</button>
-                            </form>
-                        </div>
+                        <a href="{{ route('staff.articles.edit', $article) }}" class="button secondary small" style="width:100%;text-align:center;display:block">Edit Detail</a>
                     </div>
                 @endforeach
             </div>
@@ -135,14 +87,6 @@
 
 @push('scripts')
 <script>
-function toggleArticleEdit(elementId) {
-    const element = document.getElementById(elementId);
-    if (element.style.display === 'none') {
-        element.style.display = 'block';
-    } else {
-        element.style.display = 'none';
-    }
-}
 
 (function () {
     const MAX_DIMENSION = 1600;
