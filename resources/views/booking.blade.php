@@ -42,6 +42,37 @@
             @endforeach
 
             <p id="availability-message" class="small-note" role="status" aria-live="polite" style="margin:16px 0;padding:12px;background:var(--sand);border-radius:6px">Pilih tanggal untuk memeriksa ketersediaan stok.</p>
+            
+            <script>
+            const cartItems = @json($cartItems->map(fn($item) => ['id' => $item['item']->id, 'quantity' => $item['quantity'], 'daily_rate' => $item['item']->daily_rate])->values());
+            const totalPerDay = cartItems.reduce((sum, item) => sum + (item.daily_rate * item.quantity), 0);
+            
+            function updateSummary() {
+                const start = form.elements.start_date.value;
+                const end = form.elements.end_date.value;
+                
+                if (!start || !end) {
+                    document.getElementById('duration-display').textContent = '-';
+                    document.getElementById('total-display').textContent = 'Rp0';
+                    return;
+                }
+                
+                const startDate = new Date(start);
+                const endDate = new Date(end);
+                const diffTime = endDate - startDate;
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                
+                const duration = diffDays > 0 ? diffDays : 0;
+                const total = totalPerDay * duration;
+                
+                document.getElementById('duration-display').textContent = duration + ' hari' + (duration === 1 ? '' : '');
+                document.getElementById('total-display').textContent = 'Rp' + total.toLocaleString('id-ID');
+            }
+            
+            form.elements.start_date.addEventListener('change', updateSummary);
+            form.elements.end_date.addEventListener('change', updateSummary);
+            updateSummary();
+            </script>
 
             <div style="display:flex;gap:12px;margin-top:20px">
                 <button class="button" type="submit" style="flex:1">Kirim permintaan reservasi</button>
@@ -76,13 +107,21 @@
                     <span class="small-note">Total unit</span>
                     <span style="font-weight:600">{{ $cartItems->sum('quantity') }} unit</span>
                 </div>
-                <div style="display:flex;justify-content:space-between">
+                <div style="display:flex;justify-content:space-between;margin-bottom:8px">
                     <span class="small-note">Tarif per hari</span>
-                    <span style="font:700 20px Manrope,sans-serif;color:var(--forest-dark)">Rp{{ number_format($total, 0, ',', '.') }}</span>
+                    <span style="font:600 14px Manrope,sans-serif;color:var(--forest-dark)">Rp{{ number_format($total, 0, ',', '.') }}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+                    <span class="small-note">Durasi sewa</span>
+                    <span style="font-weight:600" id="duration-display">-</span>
+                </div>
+                <div style="display:flex;justify-content:space-between">
+                    <span class="small-note">Total biaya</span>
+                    <span style="font:700 20px Manrope,sans-serif;color:var(--forest-dark)" id="total-display">Rp0</span>
                 </div>
             </div>
 
-            <p class="small-note" style="margin:16px 0 0;line-height:1.6">Total biaya final akan dihitung berdasarkan durasi sewa yang Anda pilih di formulir.</p>
+            <p class="small-note" style="margin:16px 0 0;line-height:1.6">Total biaya akan otomatis dihitung saat Anda memilih tanggal sewa.</p>
         </div>
     </div>
 </section>
