@@ -141,7 +141,7 @@
         </div>
     </div>
     <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:20px;text-align:center">
-        <p style="color:#6b7280;font-size:13px;margin:0">© {{ date('Y') }} Rimba Sewa. Sistem demonstrasi penyewaan peralatan camping.</p>
+        <p style="color:#6b7280;font-size:13px;margin:0">© {{ date('Y') }} Rimba Sewa. Sistem penyewaan peralatan camping.</p>
     </div>
 </div></footer>
 @stack('scripts')
