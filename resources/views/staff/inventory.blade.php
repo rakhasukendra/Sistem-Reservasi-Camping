@@ -10,10 +10,10 @@
         <span class="sample-tag">Transaksi dan pembayaran dummy</span>
     </div>
 
-    <div style="display:flex;gap:8px;margin:20px 0;border-bottom:2px solid var(--line);overflow-x:auto">
-        <a href="{{ route('staff.rentals') }}" style="padding:12px 20px;color:var(--muted);text-decoration:none">Kelola Sewa</a>
-        <a href="{{ route('staff.inventory') }}" style="padding:12px 20px;font-weight:600;color:var(--forest);border-bottom:3px solid var(--forest);margin-bottom:-2px;text-decoration:none">Kelola Stok</a>
-        <a href="{{ route('staff.articles') }}" style="padding:12px 20px;color:var(--muted);text-decoration:none">Edit Artikel</a>
+    <div style="display:flex;gap:8px;margin:20px 0;border-bottom:2px solid var(--line);flex-wrap:wrap">
+        <a href="{{ route('staff.rentals') }}" style="padding:12px 20px;color:var(--muted);text-decoration:none;white-space:nowrap">Kelola Sewa</a>
+        <a href="{{ route('staff.inventory') }}" style="padding:12px 20px;font-weight:600;color:var(--forest);border-bottom:3px solid var(--forest);margin-bottom:-2px;text-decoration:none;white-space:nowrap">Kelola Stok</a>
+        <a href="{{ route('staff.articles') }}" style="padding:12px 20px;color:var(--muted);text-decoration:none;white-space:nowrap">Edit Artikel</a>
     </div>
 
     <section style="padding-bottom:32px">
