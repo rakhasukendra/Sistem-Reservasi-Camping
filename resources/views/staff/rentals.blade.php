@@ -120,7 +120,7 @@
                 </select>
             </div>
             <div class="field">
-                <label for="booking-month">Bulan mulai sewa</label>
+                <label for="booking-month">Tanggal mulai sewa</label>
                 <input id="booking-month" name="month" type="month" value="{{ $month }}" onchange="this.form.submit()">
             </div>
         </form>

@@ -118,7 +118,7 @@
 
         <form method="get" action="{{ route('staff.dashboard') }}" style="display:flex;align-items:end;gap:12px;flex-wrap:wrap;margin:16px 0">
             <div class="field">
-                <label for="booking-month">Bulan mulai sewa</label>
+                <label for="booking-month">Tanggal mulai sewa</label>
                 <input id="booking-month" name="month" type="month" value="{{ $month }}">
             </div>
             <button class="button secondary small" type="submit">Tampilkan</button>
