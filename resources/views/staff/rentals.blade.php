@@ -120,23 +120,9 @@
                 </select>
             </div>
             <div class="field">
-                <label for="booking-period">Periode</label>
-                <select id="booking-period" name="period" onchange="this.form.submit()">
-                    <option value="daily" @selected($period === 'daily')>Harian</option>
-                    <option value="monthly" @selected($period === 'monthly')>Bulanan</option>
-                </select>
+                <label for="booking-month">Bulan mulai sewa</label>
+                <input id="booking-month" name="month" type="month" value="{{ $month }}" onchange="this.form.submit()">
             </div>
-            @if($period === 'daily')
-                <div class="field">
-                    <label for="booking-day">Tanggal mulai sewa</label>
-                    <input id="booking-day" name="day" type="date" value="{{ $day }}" onchange="this.form.submit()">
-                </div>
-            @else
-                <div class="field">
-                    <label for="booking-month">Bulan mulai sewa</label>
-                    <input id="booking-month" name="month" type="month" value="{{ $month }}" onchange="this.form.submit()">
-                </div>
-            @endif
         </form>
 
         @if($bookings->isEmpty())
