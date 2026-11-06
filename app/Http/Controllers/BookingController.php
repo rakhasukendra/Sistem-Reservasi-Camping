@@ -60,7 +60,8 @@ class BookingController extends Controller
                     throw ValidationException::withMessages(['items' => $result['name'].': '.$result['message']]);
                 }
             }
-            $days = max(1, (int) Carbon::parse($data['start_date'])->diffInDays(Carbon::parse($data['end_date'])) + 1);
+            $days = (int) Carbon::parse($data['start_date'])->diffInDays(Carbon::parse($data['end_date']));
+            $days = max(1, $days);
             $total = collect($lines)->sum(fn ($line) => $items[$line['id']]->daily_rate * $line['quantity'] * $days);
             $booking = Booking::create([
                 'user_id' => $request->user()->id,
