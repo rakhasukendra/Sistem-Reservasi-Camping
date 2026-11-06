@@ -70,10 +70,6 @@
             <div style="padding:16px 0;border-top:2px solid var(--line);border-bottom:2px solid var(--line)">
                 <div style="display:flex;justify-content:space-between;margin-bottom:8px">
                     <span class="small-note">Total alat</span>
-                    <span style="font-weight:600">{{ $cartItems->count() }} jenis</span>
-                </div>
-                <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-                    <span class="small-note">Total unit</span>
                     <span style="font-weight:600">{{ $cartItems->sum('quantity') }} unit</span>
                 </div>
                 <div style="display:flex;justify-content:space-between;margin-bottom:8px">
