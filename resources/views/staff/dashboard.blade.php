@@ -8,7 +8,7 @@
             <h1 class="section-title">Panel {{ auth()->user()->role }}</h1>
             <p class="muted">Kelola stok alat, tinjau permintaan sewa, dan catat kondisi pengembalian.</p>
         </div>
-        <span class="sample-tag">Transaksi dan pembayaran dummy</span>
+
     </div>
 
     <section style="padding-bottom:32px">
@@ -312,7 +312,7 @@
                             <th style="padding:18px 20px;text-align:left;font-weight:700;color:var(--forest-dark);border:none;font-size:14px">Penyewa</th>
                             <th style="padding:18px 20px;text-align:left;font-weight:700;color:var(--forest-dark);border:none;font-size:14px">Tanggal</th>
                             <th style="padding:18px 20px;text-align:left;font-weight:700;color:var(--forest-dark);border:none;font-size:14px">Status</th>
-                            <th style="padding:18px 20px;text-align:left;font-weight:700;color:var(--forest-dark);border:none;font-size:14px">Nilai dummy</th>
+                            <th style="padding:18px 20px;text-align:left;font-weight:700;color:var(--forest-dark);border:none;font-size:14px">Nilai</th>
                             <th style="padding:18px 20px;text-align:left;font-weight:700;color:var(--forest-dark);border:none;font-size:14px">Aksi</th>
                         </tr>
                     </thead>

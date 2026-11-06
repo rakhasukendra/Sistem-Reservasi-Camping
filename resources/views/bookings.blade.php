@@ -52,7 +52,7 @@
                 
                 @if($booking->pickup_verified)
                     <div class="panel" style="margin-bottom:12px;background:#f4f1e7;padding:12px;border-radius:8px">
-                        <p class="eyebrow" style="margin:0 0 8px">Kartu pengambilan dummy</p>
+                        <p class="eyebrow" style="margin:0 0 8px">Kartu pengambilan</p>
                         <strong style="font-size:14px">{{ $booking->booking_code }}</strong>
                         <div class="small-note" style="margin:4px 0 0">{{ $booking->contact_name }} · {{ $booking->start_date->format('d M Y') }} - {{ $booking->end_date->format('d M Y') }}</div>
                     </div>

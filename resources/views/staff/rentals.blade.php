@@ -7,13 +7,13 @@
             <p class="eyebrow">Operasional Rimba Sewa</p>
             <h1 class="section-title">Panel {{ auth()->user()->role }}</h1>
         </div>
-        <span class="sample-tag">Transaksi dan pembayaran dummy</span>
+
     </div>
 
-    <div style="display:flex;gap:8px;margin:20px 0;border-bottom:2px solid var(--line);flex-wrap:wrap">
-        <a href="{{ route('staff.rentals') }}" style="padding:12px 20px;font-weight:600;color:var(--forest);border-bottom:3px solid var(--forest);margin-bottom:-2px;text-decoration:none;white-space:nowrap">Kelola Sewa</a>
-        <a href="{{ route('staff.inventory') }}" style="padding:12px 20px;color:var(--muted);text-decoration:none;white-space:nowrap">Kelola Stok</a>
-        <a href="{{ route('staff.articles') }}" style="padding:12px 20px;color:var(--muted);text-decoration:none;white-space:nowrap">Edit Artikel</a>
+    <div style="display:flex;gap:8px;margin:20px 0;border-bottom:2px solid var(--line);overflow-x:auto;-webkit-overflow-scrolling:touch">
+        <a href="{{ route('staff.rentals') }}" style="padding:12px 20px;font-weight:600;color:var(--forest);border-bottom:3px solid var(--forest);margin-bottom:-2px;text-decoration:none;white-space:nowrap;flex-shrink:0">Kelola Sewa</a>
+        <a href="{{ route('staff.inventory') }}" style="padding:12px 20px;color:var(--muted);text-decoration:none;white-space:nowrap;flex-shrink:0">Kelola Stok</a>
+        <a href="{{ route('staff.articles') }}" style="padding:12px 20px;color:var(--muted);text-decoration:none;white-space:nowrap;flex-shrink:0">Edit Artikel</a>
     </div>
 
     <section style="padding:30px 0;border-top:1px solid var(--line)">
@@ -51,7 +51,7 @@
                             <th style="padding:18px 20px;text-align:left;font-weight:700;color:var(--forest-dark);border:none;font-size:14px">Penyewa</th>
                             <th style="padding:18px 20px;text-align:left;font-weight:700;color:var(--forest-dark);border:none;font-size:14px">Tanggal</th>
                             <th style="padding:18px 20px;text-align:left;font-weight:700;color:var(--forest-dark);border:none;font-size:14px">Status</th>
-                            <th style="padding:18px 20px;text-align:left;font-weight:700;color:var(--forest-dark);border:none;font-size:14px">Nilai dummy</th>
+                            <th style="padding:18px 20px;text-align:left;font-weight:700;color:var(--forest-dark);border:none;font-size:14px">Nilai</th>
                             <th style="padding:18px 20px;text-align:left;font-weight:700;color:var(--forest-dark);border:none;font-size:14px">Aksi</th>
                         </tr>
                     </thead>
