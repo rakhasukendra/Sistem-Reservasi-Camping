@@ -43,8 +43,8 @@
                 <p style="margin:0;color:var(--muted)">Transaksi reservasi akan tampil di sini.</p>
             </div>
         @else
-            <div class="table-wrap panel" style="padding:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:16px">
-                <table style="border-collapse:collapse;width:100%">
+            <div class="table-wrap panel" style="padding:0;border:1px solid var(--line);border-radius:10px;margin-top:16px">
+                <table style="border-collapse:collapse;width:100%;min-width:max-content">
                     <thead>
                         <tr style="background:var(--sand)">
                             <th style="padding:18px 20px;text-align:left;font-weight:700;color:var(--forest-dark);border:none;font-size:14px">Kode</th>
