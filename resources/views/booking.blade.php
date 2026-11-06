@@ -42,37 +42,6 @@
             @endforeach
 
             <p id="availability-message" class="small-note" role="status" aria-live="polite" style="margin:16px 0;padding:12px;background:var(--sand);border-radius:6px">Pilih tanggal untuk memeriksa ketersediaan stok.</p>
-            
-            <script>
-            const cartItems = @json($cartItems->map(fn($item) => ['id' => $item['item']->id, 'quantity' => $item['quantity'], 'daily_rate' => $item['item']->daily_rate])->values());
-            const totalPerDay = cartItems.reduce((sum, item) => sum + (item.daily_rate * item.quantity), 0);
-            
-            function updateSummary() {
-                const start = form.elements.start_date.value;
-                const end = form.elements.end_date.value;
-                
-                if (!start || !end) {
-                    document.getElementById('duration-display').textContent = '-';
-                    document.getElementById('total-display').textContent = 'Rp0';
-                    return;
-                }
-                
-                const startDate = new Date(start);
-                const endDate = new Date(end);
-                const diffTime = endDate - startDate;
-                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                
-                const duration = diffDays > 0 ? diffDays : 0;
-                const total = totalPerDay * duration;
-                
-                document.getElementById('duration-display').textContent = duration + ' hari' + (duration === 1 ? '' : '');
-                document.getElementById('total-display').textContent = 'Rp' + total.toLocaleString('id-ID');
-            }
-            
-            form.elements.start_date.addEventListener('change', updateSummary);
-            form.elements.end_date.addEventListener('change', updateSummary);
-            updateSummary();
-            </script>
 
             <div style="display:flex;gap:12px;margin-top:20px">
                 <button class="button" type="submit" style="flex:1">Kirim permintaan reservasi</button>
@@ -131,6 +100,31 @@
 <script>
 const form = document.getElementById('booking-form');
 const status = document.getElementById('availability-message');
+const cartItems = @json($cartItems->map(fn($item) => ['id' => $item['item']->id, 'quantity' => $item['quantity'], 'daily_rate' => $item['item']->daily_rate])->values());
+const totalPerDay = cartItems.reduce((sum, item) => sum + (item.daily_rate * item.quantity), 0);
+
+function updateSummary() {
+    const start = form.elements.start_date.value;
+    const end = form.elements.end_date.value;
+    
+    if (!start || !end) {
+        document.getElementById('duration-display').textContent = '-';
+        document.getElementById('total-display').textContent = 'Rp0';
+        return;
+    }
+    
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const diffTime = endDate - startDate;
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    const duration = diffDays > 0 ? diffDays : 0;
+    const total = totalPerDay * duration;
+    
+    document.getElementById('duration-display').textContent = duration + ' hari';
+    document.getElementById('total-display').textContent = 'Rp' + total.toLocaleString('id-ID');
+}
+
 const refresh = async () => {
     const start = form.elements.start_date.value;
     const end = form.elements.end_date.value;
@@ -142,7 +136,7 @@ const refresh = async () => {
     status.textContent = 'Memeriksa ketersediaan stok...';
     status.style.background = 'var(--sand)';
     try {
-        const items = @json($cartItems->map(fn($item) => ['id' => $item['item']->id, 'quantity' => $item['quantity']])->values());
+        const items = cartItems.map(item => ({id: item.id, quantity: item.quantity}));
         const response = await fetch(@json(route('bookings.availability')), {
             method: 'POST',
             headers: {'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': form.querySelector('[name=_token]').value},
@@ -166,8 +160,16 @@ const refresh = async () => {
         status.style.color = 'var(--error)';
     }
 };
-form.elements.start_date.addEventListener('change', refresh);
-form.elements.end_date.addEventListener('change', refresh);
+
+form.elements.start_date.addEventListener('change', () => {
+    updateSummary();
+    refresh();
+});
+form.elements.end_date.addEventListener('change', () => {
+    updateSummary();
+    refresh();
+});
+updateSummary();
 refresh();
 </script>
 @endpush
