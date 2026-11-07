@@ -32,16 +32,35 @@
          .nav-account-dropdown a,.nav-account-dropdown button{display:block;width:100%;padding:9px 12px;border:0;border-radius:6px;background:none;color:var(--ink);font:500 14px 'DM Sans',sans-serif;text-align:left;cursor:pointer}
          .nav-account-dropdown a:hover,.nav-account-dropdown button:hover{background:var(--sand);color:var(--forest-dark)}
          .nav-account-dropdown form{margin:0}
-         @keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
-         .flash{position:fixed;top:88px;left:50%;transform:translateX(-50%);z-index:200;min-width:400px;max-width:600px;padding:16px 24px;background:#10b981;color:white;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-weight:500;animation:slideDown 0.3s ease-out}
-         .errors{position:fixed;top:88px;left:50%;transform:translateX(-50%);z-index:200;min-width:400px;max-width:600px;padding:16px 24px;background:#dc2626;color:white;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);animation:slideDown 0.3s ease-out}.errors strong{display:block;margin-bottom:8px;font-weight:600}.errors ul{margin:0;padding-left:20px;line-height:1.6}
-          @media(max-width:768px){.wrap{width:calc(100% - 32px)}.topbar{height:auto;padding:6px 0}.nav{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;gap:0;align-items:start}.brand{grid-column:1;grid-row:1;padding:0;font-size:18px}.brand small{font-size:8px}.nav-account-menu{grid-column:2;grid-row:1;align-self:start}.nav-account{padding:0;display:flex;align-items:center;gap:8px}.nav-account-copy{display:flex;flex-direction:column;line-height:1.3}.nav-account-copy strong{font-size:12px;margin:0}.nav-account-copy small{font-size:10px;margin:0}.nav-avatar{width:34px;height:34px;font-size:12px}.navlinks{grid-column:1 / -1;grid-row:2;display:flex;gap:12px;overflow-x:auto;border-top:1px solid var(--line);padding:6px 0;margin-top:6px;width:100%}.navlinks a{padding:8px 14px;font-size:13px;white-space:nowrap;flex-shrink:0}.main{padding:0}.section-title{font-size:24px}.form-grid{grid-template-columns:1fr}.panel{padding:16px}.footer-content{grid-template-columns:1fr;gap:24px}.row.mobile-stack{flex-direction:column;align-items:flex-start}.flash{min-width:auto;max-width:calc(100% - 32px);top:76px}.errors{min-width:auto;max-width:calc(100% - 32px);top:76px}[style*="display:flex"][style*="justify-content:space-between"]{flex-direction:column;align-items:stretch!important}[style*="display:grid"][style*="grid-template-columns:1fr auto"]{grid-template-columns:1fr!important}[style*="display:grid"][style*="grid-template-columns:repeat(auto"]{grid-template-columns:1fr!important}          .table-wrap{overflow-x:auto;min-width:100%}table{min-width:max-content;white-space:nowrap}[style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr!important}}
+          @keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+          .flash{position:fixed;top:88px;left:50%;transform:translateX(-50%);z-index:200;min-width:400px;max-width:600px;padding:16px 24px;background:#10b981;color:white;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-weight:500;animation:slideDown 0.3s ease-out}
+          .errors{position:fixed;top:88px;left:50%;transform:translateX(-50%);z-index:200;min-width:400px;max-width:600px;padding:16px 24px;background:#dc2626;color:white;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);animation:slideDown 0.3s ease-out}.errors strong{display:block;margin-bottom:8px;font-weight:600}.errors ul{margin:0;padding-left:20px;line-height:1.6}
+          .mobile-menu-btn{display:none}
+          .mobile-sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:998;opacity:0;transition:opacity 0.3s}
+          .mobile-sidebar-overlay.open{display:block;opacity:1}
+          .mobile-sidebar{position:fixed;top:0;left:-280px;width:280px;height:100vh;background:white;z-index:999;transition:left 0.3s ease;overflow-y:auto;display:flex;flex-direction:column}
+          .mobile-sidebar.open{left:0}
+          .mobile-sidebar-header{display:flex;align-items:center;gap:12px;padding:20px;border-bottom:1px solid var(--line)}
+          .mobile-sidebar-logo{display:flex;align-items:center;gap:8px;flex:1}
+          .mobile-sidebar-logo svg{width:32px;height:32px;color:var(--forest-dark)}
+          .mobile-sidebar-logo span{font-size:18px;font-weight:700;color:var(--forest-dark)}
+          .mobile-sidebar-close{border:0;background:none;padding:4px;cursor:pointer;color:var(--ink)}
+          .mobile-sidebar-menu{display:flex;flex-direction:column}
+          .mobile-sidebar-menu a{display:flex;align-items:center;gap:14px;padding:16px 20px;color:var(--ink);font-size:15px;border-bottom:1px solid var(--line);transition:background 0.2s}
+          .mobile-sidebar-menu a svg{width:20px;height:20px;flex-shrink:0;stroke-width:2}
+          .mobile-sidebar-menu a:hover,.mobile-sidebar-menu a.active{background:#e0f2fe;color:var(--accent)}
+          @media(max-width:768px){.wrap{width:calc(100% - 32px)}.topbar{height:auto;padding:12px 0}.nav{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px}.mobile-menu-btn{display:block;grid-column:1;border:0;background:none;padding:6px;cursor:pointer;color:var(--forest-dark)}.brand{grid-column:2;padding:0;font-size:16px;text-align:center}.brand small{font-size:8px}.nav-account-menu{grid-column:3}.nav-account{padding:0;display:flex;align-items:center;gap:6px}.nav-account-copy{display:flex;flex-direction:column;line-height:1.2}.nav-account-copy strong{font-size:11px;margin:0}.nav-account-copy small{font-size:9px;margin:0}.nav-avatar{width:32px;height:32px;font-size:11px}.navlinks{display:none!important}.main{padding:0}.section-title{font-size:24px}.form-grid{grid-template-columns:1fr}.panel{padding:16px}.footer-content{grid-template-columns:1fr;gap:24px}.row.mobile-stack{flex-direction:column;align-items:flex-start}.flash{min-width:auto;max-width:calc(100% - 32px);top:76px}.errors{min-width:auto;max-width:calc(100% - 32px);top:76px}[style*="display:flex"][style*="justify-content:space-between"]{flex-direction:column;align-items:stretch!important}[style*="display:grid"][style*="grid-template-columns:1fr auto"]{grid-template-columns:1fr!important}[style*="display:grid"][style*="grid-template-columns:repeat(auto"]{grid-template-columns:1fr!important}.table-wrap{overflow-x:auto;min-width:100%}table{min-width:max-content;white-space:nowrap}[style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr!important}}
     </style>
     @stack('head')
 </head>
 <body class="@if (request()->routeIs('home')) home-page @endif">
 <header class="topbar">
     <nav class="nav" aria-label="Navigasi utama">
+        <button class="mobile-menu-btn" type="button" onclick="toggleMobileSidebar()" aria-label="Buka menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
+            </svg>
+        </button>
         <a class="brand" href="{{ route('home') }}">Rimba Sewa<small>Peralatan perjalanan luar ruang</small></a>
         <div class="navlinks">
             <a href="{{ route('home') }}#alat">Alat sewa</a>
@@ -97,6 +116,70 @@
         @endauth
     </nav>
 </header>
+<div class="mobile-sidebar-overlay" id="mobile-sidebar-overlay" onclick="closeMobileSidebar()"></div>
+<aside class="mobile-sidebar" id="mobile-sidebar">
+    <div class="mobile-sidebar-header">
+        <div class="mobile-sidebar-logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            </svg>
+            <span>Rimba Sewa</span>
+        </div>
+        <button class="mobile-sidebar-close" onclick="closeMobileSidebar()" aria-label="Tutup menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 6L6 18M6 6l12 12"/>
+            </svg>
+        </button>
+    </div>
+    <nav class="mobile-sidebar-menu">
+        <a href="{{ route('home') }}#alat" onclick="closeMobileSidebar()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            Alat sewa
+        </a>
+        @if (! auth()->check() || ! in_array(auth()->user()->role, ['admin', 'staff'], true))
+            <a href="{{ route('home') }}#cara-pesan" onclick="closeMobileSidebar()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                Panduan
+            </a>
+        @endif
+        @auth
+            @if (! in_array(auth()->user()->role, ['admin', 'staff'], true))
+                <a href="{{ route('cart') }}" onclick="closeMobileSidebar()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                    Keranjang
+                </a>
+                <a href="{{ route('bookings.index') }}" onclick="closeMobileSidebar()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    Riwayat sewa
+                </a>
+            @endif
+            @if (in_array(auth()->user()->role, ['staff', 'admin'], true))
+                <a href="{{ route('staff.analytics') }}" onclick="closeMobileSidebar()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    Dashboard
+                </a>
+                <a href="{{ route('staff.dashboard') }}" onclick="closeMobileSidebar()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    Panel {{ auth()->user()->role === 'admin' ? 'admin' : 'staf' }}
+                </a>
+                @if (auth()->user()->role === 'admin')
+                    <a href="{{ route('admin.assessments') }}" onclick="closeMobileSidebar()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        Penilaian staff
+                    </a>
+                @endif
+            @endif
+        @else
+            <a href="{{ route('login') }}" onclick="closeMobileSidebar()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                Masuk
+            </a>
+            <a href="{{ route('register') }}" onclick="closeMobileSidebar()" style="background:var(--accent);color:white;margin:12px 20px;border-radius:8px;font-weight:600">
+                Buat akun
+            </a>
+        @endauth
+    </nav>
+</aside>
 <main class="main">
     @if (session('success'))<div class="wrap"><div class="flash" role="status">{{ session('success') }}</div></div>@endif
     @if ($errors->any())<div class="wrap"><div class="errors" role="alert"><strong>Periksa kembali isian berikut:</strong><ul>@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div></div>@endif
@@ -169,8 +252,10 @@ document.addEventListener('DOMContentLoaded',function(){const topbar=document.qu
 <script>
 function closeAccountMenu(){document.querySelectorAll('.nav-account-menu').forEach(function(menu){var button=menu.querySelector('.nav-account');var dropdown=menu.querySelector('.nav-account-dropdown');if(button){button.setAttribute('aria-expanded','false')}if(dropdown){dropdown.hidden=true}})}
 function toggleAccountMenu(button){var menu=button.closest('.nav-account-menu');var dropdown=menu.querySelector('.nav-account-dropdown');var willOpen=dropdown.hidden;closeAccountMenu();if(willOpen){dropdown.hidden=false;button.setAttribute('aria-expanded','true')}}
+function toggleMobileSidebar(){var sidebar=document.getElementById('mobile-sidebar');var overlay=document.getElementById('mobile-sidebar-overlay');if(sidebar&&overlay){sidebar.classList.toggle('open');overlay.classList.toggle('open')}}
+function closeMobileSidebar(){var sidebar=document.getElementById('mobile-sidebar');var overlay=document.getElementById('mobile-sidebar-overlay');if(sidebar&&overlay){sidebar.classList.remove('open');overlay.classList.remove('open')}}
 document.addEventListener('click',function(event){if(!event.target.closest('.nav-account-menu')){closeAccountMenu()}});
-document.addEventListener('keydown',function(event){if(event.key==='Escape'){closeAccountMenu()}});
+document.addEventListener('keydown',function(event){if(event.key==='Escape'){closeAccountMenu();closeMobileSidebar()}});;
 </script>
 </body>
 </html>
