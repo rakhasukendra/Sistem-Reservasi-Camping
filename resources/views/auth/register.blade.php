@@ -10,7 +10,7 @@
         <div class="field"><label for="password">Kata sandi, minimal 8 karakter</label><input id="password" name="password" type="password" required autocomplete="new-password"></div>
         <div class="field"><label for="password_confirmation">Ulangi kata sandi</label><input id="password_confirmation" name="password_confirmation" type="password" required autocomplete="new-password"></div>
         <button class="button" type="submit">Buat akun penyewa</button>
-        <p class="small-note">Sudah punya akun? <a class="text-link" href="{{ route('login') }}">Masuk di sini</a></p>
+        <p style="font-size:13px;color:var(--muted);margin:12px 0 0">Sudah punya akun? <a href="{{ route('login') }}" style="color:#0066cc !important;font-weight:600;text-decoration:none">Masuk di sini</a></p>
     </form>
 </div>
 @endsection

@@ -60,7 +60,12 @@
                             <tr data-status="{{ $transaction->status }}" data-pending="{{ $transaction->status === 'pending' || $transaction->cancellation_requested_at ? 'true' : 'false' }}" style="border-top:1px solid var(--line)">
                                 <td style="padding:16px 20px;font-weight:600;color:var(--forest-dark);border:none;font-size:15px">{{ $transaction->booking_code }}</td>
                                 <td style="padding:16px 20px;color:var(--ink);border:none;font-size:14px">{{ $transaction->user->name }}</td>
-                                <td style="padding:16px 20px;color:var(--muted);border:none;font-size:14px">{{ $transaction->start_date->format('d/m/Y') }}<br>sampai {{ $transaction->end_date->format('d/m/Y') }}</td>
+                                <td style="padding:16px 20px;color:var(--muted);border:none;font-size:14px">
+                                    {{ $transaction->start_date->format('d/m/Y') }}<br>sampai {{ $transaction->end_date->format('d/m/Y') }}
+                                    @if($transaction->payment_proof)
+                                        <br><a href="{{ asset('storage/'.$transaction->payment_proof) }}" target="_blank" style="color:var(--forest);font-size:12px;text-decoration:underline">Lihat bukti transfer</a>
+                                    @endif
+                                </td>
                                 <td style="padding:16px 20px;border:none">
                                     <span class="status {{ $transaction->status }}" style="display:inline-block;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:700;text-transform:uppercase">
                                         {{ $transaction->cancellation_requested_at ? 'pembatalan diminta' : $transaction->status }}

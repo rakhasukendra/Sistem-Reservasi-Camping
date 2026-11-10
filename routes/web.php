@@ -33,6 +33,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/ketersediaan', [BookingController::class, 'checkAvailability'])->middleware('throttle:30,1')->name('bookings.availability');
         Route::post('/reservasi', [BookingController::class, 'store'])->name('bookings.store');
         Route::post('/reservasi/{booking}/batal', [BookingController::class, 'cancel'])->name('bookings.cancel');
+        Route::post('/reservasi/{booking}/bukti-transfer', [BookingController::class, 'uploadPaymentProof'])->name('bookings.payment-proof');
     });
 });
 

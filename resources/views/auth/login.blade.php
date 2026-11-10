@@ -9,7 +9,7 @@
             <label for="password">Kata sandi</label>
             <div style="position:relative">
                 <input id="password" name="password" type="password" required autocomplete="current-password" style="width:100%;padding-right:45px">
-                <button type="button" onclick="togglePassword()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:8px;color:var(--muted)">
+                <button type="button" onclick="togglePassword()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:8px;color:var(--muted);display:flex;align-items:center;justify-content:center">
                     <svg id="eye-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
@@ -17,7 +17,9 @@
                 </button>
             </div>
         </div>
-        <label style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><input type="checkbox" name="remember" value="1"> Ingat saya</label>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" name="remember" value="1"> Ingat saya</label>
+        </div>
         <button class="button" type="submit">Masuk</button>
         <p class="small-note">Belum memiliki akun? <a href="{{ route('register') }}" style="color:#0066cc;font-weight:600">Daftar sebagai penyewa</a></p>
     </form>

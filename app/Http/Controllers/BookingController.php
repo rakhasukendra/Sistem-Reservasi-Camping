@@ -72,6 +72,7 @@ class BookingController extends Controller
                 'contact_name' => $data['contact_name'],
                 'contact' => $data['contact'],
                 'total' => $total,
+                'payment_due_at' => now()->addMinutes(10),
             ]);
             foreach ($lines as $line) {
                 $booking->items()->attach($line['id'], ['quantity' => $line['quantity'], 'unit_rate' => $items[$line['id']]->daily_rate]);
@@ -82,7 +83,12 @@ class BookingController extends Controller
 
         session()->forget('cart');
 
-        return redirect()->route('profile')->with('success', 'Reservasi '.$booking->booking_code.' tersimpan dan menunggu konfirmasi staf.');
+        return redirect()->route('bookings.index')->with([
+            'success' => 'Reservasi '.$booking->booking_code.' berhasil dibuat!',
+            'show_payment_reminder' => true,
+            'booking_code' => $booking->booking_code,
+            'booking_id' => $booking->id,
+        ]);
     }
 
     public function cancel(Request $request, Booking $booking): RedirectResponse
@@ -181,6 +187,21 @@ class BookingController extends Controller
         session()->forget('cart');
 
         return back()->with('success', 'Keranjang dikosongkan.');
+    }
+
+    public function uploadPaymentProof(Request $request, Booking $booking): RedirectResponse
+    {
+        abort_unless($booking->user_id === $request->user()->id, 403);
+        abort_unless($booking->status === 'pending', 422, 'Hanya reservasi pending yang bisa upload bukti transfer.');
+        
+        $data = $request->validate(['payment_proof' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120']]);
+
+        $fileName = $booking->booking_code.'_'.time().'.'.$request->file('payment_proof')->getClientOriginalExtension();
+        $path = $request->file('payment_proof')->storeAs('payment-proofs', $fileName, 'public');
+
+        $booking->update(['payment_proof' => $path]);
+
+        return back()->with('success', 'Bukti transfer berhasil diupload. Staf akan memverifikasi pembayaran Anda.');
     }
 
     private function availability(array $lines, string $start, string $end): array

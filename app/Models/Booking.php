@@ -8,11 +8,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Booking extends Model
 {
-    protected $fillable = ['user_id', 'booking_code', 'start_date', 'end_date', 'status', 'previous_booking_status', 'contact_name', 'contact', 'cancel_reason', 'cancellation_requested_at', 'cancellation_review_note', 'refund_note', 'deposit_note', 'total', 'contact_verified', 'pickup_verified', 'return_condition', 'replacement_amount', 'replacement_paid'];
+    protected $fillable = ['user_id', 'booking_code', 'start_date', 'end_date', 'status', 'previous_booking_status', 'contact_name', 'contact', 'cancel_reason', 'cancellation_requested_at', 'cancellation_review_note', 'refund_note', 'deposit_note', 'total', 'contact_verified', 'pickup_verified', 'return_condition', 'replacement_amount', 'replacement_paid', 'payment_proof', 'payment_due_at'];
 
     protected function casts(): array
     {
-        return ['start_date' => 'date', 'end_date' => 'date', 'cancellation_requested_at' => 'datetime', 'contact_verified' => 'boolean', 'pickup_verified' => 'boolean', 'replacement_paid' => 'boolean'];
+        return ['start_date' => 'date', 'end_date' => 'date', 'cancellation_requested_at' => 'datetime', 'payment_due_at' => 'datetime', 'contact_verified' => 'boolean', 'pickup_verified' => 'boolean', 'replacement_paid' => 'boolean'];
     }
 
     public function user(): BelongsTo
