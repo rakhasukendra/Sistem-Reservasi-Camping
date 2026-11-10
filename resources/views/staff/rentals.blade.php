@@ -63,7 +63,14 @@
                                 <td style="padding:16px 20px;color:var(--muted);border:none;font-size:14px">
                                     {{ $transaction->start_date->format('d/m/Y') }}<br>sampai {{ $transaction->end_date->format('d/m/Y') }}
                                     @if($transaction->payment_proof)
-                                        <br><a href="{{ asset('storage/'.$transaction->payment_proof) }}" target="_blank" style="color:var(--forest);font-size:12px;text-decoration:underline">Lihat bukti transfer</a>
+                                        <br><a href="{{ asset('storage/'.$transaction->payment_proof) }}" target="_blank" style="display:inline-flex;align-items:center;gap:4px;margin-top:8px;padding:6px 12px;background:#dcfce7;color:#065f46;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600;border:1px solid #bbf7d0">
+                                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                            </svg>
+                                            Lihat Bukti Transfer
+                                        </a>
+                                    @else
+                                        <br><span style="display:inline-block;margin-top:8px;padding:6px 12px;background:#fee2e2;color:#7f1d1d;border-radius:6px;font-size:12px;font-weight:600;border:1px solid #fecaca">Belum upload</span>
                                     @endif
                                 </td>
                                 <td style="padding:16px 20px;border:none">
@@ -173,6 +180,23 @@
                                 <button type="button" onclick="toggleVerifyForm('pickup-{{ $booking->id }}')" style="display:block;margin-top:6px;background:none;border:0;color:var(--forest);font-size:11px;cursor:pointer;text-decoration:underline">Ubah</button>
                             </div>
                         </div>
+
+                        @if($booking->payment_proof)
+                            <div style="margin-bottom:12px;padding:12px;background:#dcfce7;border:1px solid #bbf7d0;border-radius:6px">
+                                <p style="font-size:11px;color:#065f46;margin:0 0 8px;font-weight:600">✓ Bukti Transfer Tersedia</p>
+                                <a href="{{ asset('storage/'.$booking->payment_proof) }}" target="_blank" class="button secondary small" style="width:100%;justify-content:center;display:flex;align-items:center;gap:6px;font-size:12px">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                    Lihat Bukti Transfer
+                                </a>
+                            </div>
+                        @elseif($booking->status === 'pending')
+                            <div style="margin-bottom:12px;padding:12px;background:#fee2e2;border:1px solid #fecaca;border-radius:6px">
+                                <p style="font-size:11px;color:#7f1d1d;margin:0;font-weight:600">⚠ Belum upload bukti transfer</p>
+                            </div>
+                        @endif
 
                         <div id="contact-{{ $booking->id }}" style="display:none;margin-bottom:12px;padding:12px;background:var(--sand);border-radius:6px">
                             <p style="font-size:12px;font-weight:600;margin:0 0 8px">Ubah status verifikasi kontak</p>
