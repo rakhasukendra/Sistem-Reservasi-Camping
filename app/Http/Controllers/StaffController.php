@@ -13,6 +13,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class StaffController extends Controller
@@ -100,6 +101,8 @@ class StaffController extends Controller
 
     public function decide(Request $request, Booking $booking): RedirectResponse
     {
+        abort_unless(! $booking->pickup_verified, 422, 'Status reservasi tidak dapat diubah setelah pengambilan dicatat.');
+
         $data = $request->validate(['decision' => ['required', Rule::in(['approved', 'rejected', 'pending'])], 'reason' => ['nullable', 'string', 'max:1000']]);
 
         if ($data['decision'] === 'rejected' && empty($data['reason'])) {
@@ -149,6 +152,7 @@ class StaffController extends Controller
     public function verifyContact(Request $request, Booking $booking): RedirectResponse
     {
         abort_unless($booking->status === 'approved', 422, 'Kontak hanya dapat diverifikasi untuk reservasi yang disetujui.');
+        abort_unless($booking->return_condition === 'not_returned', 422, 'Verifikasi tidak dapat diubah setelah kondisi pengembalian dicatat.');
 
         if ($request->boolean('reset')) {
             $booking->update(['contact_verified' => false]);
@@ -170,6 +174,7 @@ class StaffController extends Controller
     public function pickup(Request $request, Booking $booking): RedirectResponse
     {
         abort_unless($booking->status === 'approved', 422, 'Reservasi harus disetujui sebelum alat diambil.');
+        abort_unless($booking->return_condition === 'not_returned', 422, 'Catatan pengambilan tidak dapat diubah setelah kondisi pengembalian dicatat.');
 
         if ($request->boolean('reset')) {
             $booking->update(['pickup_verified' => false]);
@@ -196,31 +201,17 @@ class StaffController extends Controller
             $lockedBooking = Booking::query()->with('items')->lockForUpdate()->findOrFail($booking->id);
             abort_unless($lockedBooking->status === 'approved', 422, 'Kondisi hanya dapat dicatat untuk reservasi yang disetujui.');
             abort_unless($lockedBooking->contact_verified && $lockedBooking->pickup_verified, 422, 'Verifikasi kontak dan catat pengambilan sebelum kondisi pengembalian.');
+            abort_unless($lockedBooking->return_condition === 'not_returned', 422, 'Kondisi pengembalian sudah dicatat.');
 
             foreach ($lockedBooking->items->sortBy('id') as $bookingItem) {
                 $quantity = (int) $bookingItem->pivot->quantity;
                 $item = CampingItem::query()->lockForUpdate()->findOrFail($bookingItem->id);
 
-                if ($lockedBooking->return_condition !== 'not_returned') {
-                    if ($lockedBooking->return_condition === 'damaged' && $data['condition'] !== 'damaged') {
-                        $item->stock_damaged = max(0, $item->stock_damaged - $quantity);
-                    }
-                    if ($lockedBooking->return_condition === 'lost' && $data['condition'] !== 'lost') {
-                        $item->stock_total += $quantity;
-                    }
-                    if ($data['condition'] === 'damaged') {
-                        $item->stock_damaged += $quantity;
-                    }
-                    if ($data['condition'] === 'lost') {
-                        $item->stock_total = max(0, $item->stock_total - $quantity);
-                    }
-                } else {
-                    if ($data['condition'] === 'damaged') {
-                        $item->stock_damaged += $quantity;
-                    }
-                    if ($data['condition'] === 'lost') {
-                        $item->stock_total = max(0, $item->stock_total - $quantity);
-                    }
+                if ($data['condition'] === 'damaged') {
+                    $item->stock_damaged += $quantity;
+                }
+                if ($data['condition'] === 'lost') {
+                    $item->stock_total = max(0, $item->stock_total - $quantity);
                 }
                 $item->save();
             }
@@ -245,20 +236,60 @@ class StaffController extends Controller
             return back()->withErrors(['stock_damaged' => 'Stok rusak tidak boleh lebih besar dari stok total.'])->withInput();
         }
 
-        $data['is_available'] = (bool) ($data['is_available'] ?? false);
         if ($item) {
-            $item->update($data);
+            $item = DB::transaction(function () use ($item, $data) {
+                $lockedItem = CampingItem::query()->lockForUpdate()->findOrFail($item->id);
+                $committedStock = DB::table('booking_items')
+                    ->join('bookings', 'booking_items.booking_id', '=', 'bookings.id')
+                    ->where('booking_items.camping_item_id', $lockedItem->id)
+                    ->where(function ($query) {
+                        $query->where('bookings.status', 'approved')
+                            ->orWhere(function ($pending) {
+                                $pending->where('bookings.status', 'pending')
+                                    ->where(function ($expiry) {
+                                        $expiry->whereNull('bookings.payment_due_at')
+                                            ->orWhere('bookings.payment_due_at', '>=', now())
+                                            ->orWhereNotNull('bookings.payment_proof');
+                                    });
+                            });
+                    })
+                    ->select('booking_items.quantity', 'bookings.start_date', 'bookings.end_date')
+                    ->get();
+                $events = [];
+                foreach ($committedStock as $booking) {
+                    $start = Carbon::parse($booking->start_date)->toDateString();
+                    $release = Carbon::parse($booking->end_date)->addDay()->toDateString();
+                    $events[$start] = ($events[$start] ?? 0) + (int) $booking->quantity;
+                    $events[$release] = ($events[$release] ?? 0) - (int) $booking->quantity;
+                }
+                ksort($events);
+                $reserved = 0;
+                $maximumReserved = 0;
+                foreach ($events as $change) {
+                    $reserved += $change;
+                    $maximumReserved = max($maximumReserved, $reserved);
+                }
+
+                if ($maximumReserved > $data['stock_total'] - $data['stock_damaged']) {
+                    throw ValidationException::withMessages(['stock_total' => 'Stok layak sewa tidak boleh kurang dari jumlah reservasi aktif yang bertumpang tindih.']);
+                }
+
+                $lockedItem->update($data + ['is_available' => (bool) ($data['is_available'] ?? false)]);
+
+                return $lockedItem;
+            });
             $message = 'Data alat diperbarui.';
             $this->log($request, 'equipment.saved', $data['name']);
 
             return redirect()->route('staff.inventory')->with('success', $message);
-        } else {
-            CampingItem::create($data);
-            $message = 'Alat ditambahkan.';
-            $this->log($request, 'equipment.saved', $data['name']);
-
-            return back()->with('success', $message);
         }
+
+        $data['is_available'] = (bool) ($data['is_available'] ?? false);
+        CampingItem::create($data);
+        $message = 'Alat ditambahkan.';
+        $this->log($request, 'equipment.saved', $data['name']);
+
+        return back()->with('success', $message);
     }
 
     public function deleteItem(Request $request, CampingItem $item): RedirectResponse

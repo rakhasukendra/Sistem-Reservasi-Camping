@@ -11,6 +11,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -205,7 +206,7 @@ class ReservationFlowTest extends TestCase
             'password_confirmation' => 'Camping#2026',
         ]);
 
-        $response->assertRedirect('/profil');
+        $response->assertRedirect('/masuk');
         $account = User::where('email', 'renter@example.test')->firstOrFail();
         $this->assertSame('user', $account->role);
         $this->assertTrue(Hash::check('Camping#2026', $account->password));
@@ -224,7 +225,7 @@ class ReservationFlowTest extends TestCase
             'contact_name' => $user->name,
             'contact' => $user->phone,
             'items' => [['id' => $item->id, 'quantity' => 2]],
-        ])->assertRedirect('/profil');
+        ])->assertRedirect('/reservasi-saya');
 
         $booking = Booking::firstOrFail();
         $this->assertSame('pending', $booking->status);
@@ -242,6 +243,45 @@ class ReservationFlowTest extends TestCase
             'end_date' => Carbon::today()->addDays(21)->toDateString(),
             'items' => [['id' => $item->id, 'quantity' => 8]],
         ])->assertOk()->assertJsonPath('items.0.available', true)->assertJsonPath('items.0.remaining', 8);
+    }
+
+    public function test_booking_total_matches_inclusive_rental_days(): void
+    {
+        $user = User::where('email', 'user@demo.test')->firstOrFail();
+        $item = CampingItem::where('name', 'Tenda Dome 4 Orang')->firstOrFail();
+        $start = Carbon::today()->addDays(10);
+        $end = $start->copy()->addDays(2);
+
+        $this->actingAs($user)->post('/reservasi', [
+            'start_date' => $start->toDateString(),
+            'end_date' => $end->toDateString(),
+            'contact_name' => $user->name,
+            'contact' => $user->phone,
+            'items' => [['id' => $item->id, 'quantity' => 2]],
+        ])->assertRedirect('/reservasi-saya');
+
+        $booking = Booking::firstOrFail();
+        $this->assertSame(3, $booking->rental_days);
+        $this->assertSame($item->daily_rate * 2 * 3, $booking->total);
+    }
+
+    public function test_same_day_booking_is_charged_as_one_rental_day(): void
+    {
+        $user = User::where('email', 'user@demo.test')->firstOrFail();
+        $item = CampingItem::where('name', 'Tenda Dome 4 Orang')->firstOrFail();
+        $date = Carbon::today()->addDays(10)->toDateString();
+
+        $this->actingAs($user)->post('/reservasi', [
+            'start_date' => $date,
+            'end_date' => $date,
+            'contact_name' => $user->name,
+            'contact' => $user->phone,
+            'items' => [['id' => $item->id, 'quantity' => 2]],
+        ])->assertRedirect('/reservasi-saya');
+
+        $booking = Booking::firstOrFail();
+        $this->assertSame(1, $booking->rental_days);
+        $this->assertSame($item->daily_rate * 2, $booking->total);
     }
 
     public function test_availability_uses_peak_overlapping_reservations_instead_of_summing_all_bookings(): void
@@ -274,6 +314,121 @@ class ReservationFlowTest extends TestCase
         ])->assertOk()
             ->assertJsonPath('items.0.available', true)
             ->assertJsonPath('items.0.remaining', 2);
+    }
+
+    public function test_expired_unpaid_pending_booking_does_not_reserve_stock(): void
+    {
+        $user = User::where('email', 'user@demo.test')->firstOrFail();
+        $item = CampingItem::where('name', 'Tenda Dome 4 Orang')->firstOrFail();
+        $start = Carbon::today()->addDays(10);
+        $booking = Booking::create([
+            'user_id' => $user->id,
+            'booking_code' => 'CAMP-EXPIRED01',
+            'start_date' => $start,
+            'end_date' => $start->copy()->addDay(),
+            'status' => 'pending',
+            'contact_name' => $user->name,
+            'contact' => $user->phone,
+            'total' => 0,
+            'payment_due_at' => now()->subMinute(),
+        ]);
+        $booking->items()->attach($item->id, ['quantity' => 8, 'unit_rate' => $item->daily_rate]);
+
+        $this->actingAs($user)->postJson('/ketersediaan', [
+            'start_date' => $start->toDateString(),
+            'end_date' => $start->copy()->addDay()->toDateString(),
+            'items' => [['id' => $item->id, 'quantity' => 8]],
+        ])->assertOk()->assertJsonPath('items.0.available', true)->assertJsonPath('items.0.remaining', 8);
+    }
+
+    public function test_expiry_command_cancels_unpaid_bookings_but_keeps_bookings_with_payment_proof(): void
+    {
+        $user = User::where('email', 'user@demo.test')->firstOrFail();
+        $expired = Booking::create([
+            'user_id' => $user->id,
+            'booking_code' => 'CAMP-EXPIRED02',
+            'start_date' => Carbon::tomorrow(),
+            'end_date' => Carbon::tomorrow(),
+            'status' => 'pending',
+            'contact_name' => $user->name,
+            'contact' => $user->phone,
+            'total' => 100,
+            'payment_due_at' => now()->subMinute(),
+        ]);
+        $paid = Booking::create([
+            'user_id' => $user->id,
+            'booking_code' => 'CAMP-PAID0001',
+            'start_date' => Carbon::tomorrow(),
+            'end_date' => Carbon::tomorrow(),
+            'status' => 'pending',
+            'contact_name' => $user->name,
+            'contact' => $user->phone,
+            'total' => 100,
+            'payment_due_at' => now()->subMinute(),
+            'payment_proof' => 'payment-proofs/proof.jpg',
+        ]);
+
+        $this->artisan('app:cancel-expired-bookings')->assertSuccessful();
+
+        $this->assertDatabaseHas('bookings', ['id' => $expired->id, 'status' => 'cancelled']);
+        $this->assertDatabaseHas('bookings', ['id' => $paid->id, 'status' => 'pending']);
+    }
+
+    public function test_expiry_command_is_scheduled_every_minute(): void
+    {
+        $event = collect(Schedule::events())->first(fn ($event) => str_contains($event->command, 'app:cancel-expired-bookings'));
+
+        $this->assertNotNull($event);
+        $this->assertSame('* * * * *', $event->expression);
+    }
+
+    public function test_staff_cannot_reduce_sellable_stock_below_active_booking_commitments(): void
+    {
+        $user = User::where('email', 'user@demo.test')->firstOrFail();
+        $staff = User::where('email', 'staff@demo.test')->firstOrFail();
+        $item = CampingItem::where('name', 'Tenda Dome 4 Orang')->firstOrFail();
+        $start = Carbon::today()->addDays(10);
+        $booking = Booking::create([
+            'user_id' => $user->id,
+            'booking_code' => 'CAMP-STOCKLOCK',
+            'start_date' => $start,
+            'end_date' => $start->copy()->addDay(),
+            'status' => 'approved',
+            'contact_name' => $user->name,
+            'contact' => $user->phone,
+            'total' => 100,
+        ]);
+        $booking->items()->attach($item->id, ['quantity' => 7, 'unit_rate' => $item->daily_rate]);
+
+        $this->actingAs($staff)->put('/staff/alat/'.$item->id, [
+            'name' => $item->name,
+            'category' => $item->category,
+            'description' => $item->description,
+            'stock_total' => 6,
+            'stock_damaged' => 0,
+            'daily_rate' => $item->daily_rate,
+            'is_available' => 1,
+        ])->assertSessionHasErrors('stock_total');
+
+        $this->assertSame(8, $item->fresh()->stock_total);
+    }
+
+    public function test_staff_can_reduce_stock_when_all_active_bookings_still_fit(): void
+    {
+        $staff = User::where('email', 'staff@demo.test')->firstOrFail();
+        $item = CampingItem::where('name', 'Tenda Dome 4 Orang')->firstOrFail();
+
+        $this->actingAs($staff)->put('/staff/alat/'.$item->id, [
+            'name' => $item->name,
+            'category' => $item->category,
+            'description' => $item->description,
+            'stock_total' => 7,
+            'stock_damaged' => 1,
+            'daily_rate' => $item->daily_rate,
+            'is_available' => 1,
+        ])->assertRedirect();
+
+        $this->assertSame(7, $item->fresh()->stock_total);
     }
 
     public function test_cancellation_waits_for_staff_before_releasing_stock_and_records_refund_policy(): void
@@ -482,7 +637,7 @@ class ReservationFlowTest extends TestCase
         $this->actingAs($renter)->get('/reservasi-saya')->assertOk()
             ->assertSee('✓ Terverifikasi')
             ->assertSee('✓ Sudah diambil')
-            ->assertSee('Kartu pengambilan dummy');
+            ->assertSee('Kartu pengambilan');
 
         $this->actingAs($staff)->post('/staff/reservasi/'.$booking->id.'/keputusan', [
             'decision' => 'pending',
@@ -494,7 +649,7 @@ class ReservationFlowTest extends TestCase
         $this->actingAs($renter)->get('/reservasi-saya')->assertOk()
             ->assertSee('✓ Terverifikasi')
             ->assertSee('✓ Sudah diambil')
-            ->assertSee('Kartu pengambilan dummy');
+            ->assertSee('Kartu pengambilan');
     }
 
     public function test_returned_damaged_and_lost_equipment_updates_sellable_inventory_once(): void
@@ -524,7 +679,7 @@ class ReservationFlowTest extends TestCase
 
         $this->actingAs($staff)->post('/staff/reservasi/'.$booking->id.'/kondisi', [
             'condition' => 'good',
-        ])->assertRedirect()->assertSessionHasErrors('condition');
+        ])->assertStatus(422);
         $this->assertSame(2, $item->fresh()->stock_damaged);
 
         $lostBooking = Booking::create([

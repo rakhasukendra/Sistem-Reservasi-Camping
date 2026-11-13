@@ -16,6 +16,7 @@ class CancelExpiredBookings extends Command
         $expiredBookings = Booking::where('status', 'pending')
             ->whereNotNull('payment_due_at')
             ->where('payment_due_at', '<', now())
+            ->whereNull('payment_proof')
             ->get();
 
         foreach ($expiredBookings as $booking) {

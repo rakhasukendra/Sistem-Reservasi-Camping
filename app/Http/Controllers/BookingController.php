@@ -60,8 +60,7 @@ class BookingController extends Controller
                     throw ValidationException::withMessages(['items' => $result['name'].': '.$result['message']]);
                 }
             }
-            $days = (int) Carbon::parse($data['start_date'])->diffInDays(Carbon::parse($data['end_date']));
-            $days = max(1, $days);
+            $days = max(1, (int) Carbon::parse($data['start_date'])->diffInDays(Carbon::parse($data['end_date'])) + 1);
             $total = collect($lines)->sum(fn ($line) => $items[$line['id']]->daily_rate * $line['quantity'] * $days);
             $booking = Booking::create([
                 'user_id' => $request->user()->id,
@@ -193,7 +192,7 @@ class BookingController extends Controller
     {
         abort_unless($booking->user_id === $request->user()->id, 403);
         abort_unless($booking->status === 'pending', 422, 'Hanya reservasi pending yang bisa upload bukti transfer.');
-        
+
         $data = $request->validate(['payment_proof' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120']]);
 
         $fileName = $booking->booking_code.'_'.time().'.'.$request->file('payment_proof')->getClientOriginalExtension();
@@ -212,6 +211,12 @@ class BookingController extends Controller
             ->join('bookings', 'booking_items.booking_id', '=', 'bookings.id')
             ->whereIn('booking_items.camping_item_id', $ids)
             ->whereIn('bookings.status', ['pending', 'approved'])
+            ->where(function ($query) {
+                $query->where('bookings.status', 'approved')
+                    ->orWhereNull('bookings.payment_due_at')
+                    ->orWhere('bookings.payment_due_at', '>=', now())
+                    ->orWhereNotNull('bookings.payment_proof');
+            })
             ->whereDate('bookings.start_date', '<=', $end)
             ->whereDate('bookings.end_date', '>=', $start)
             ->select('booking_items.camping_item_id', 'booking_items.quantity', 'bookings.start_date', 'bookings.end_date')
