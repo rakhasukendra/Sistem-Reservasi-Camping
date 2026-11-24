@@ -10,9 +10,11 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class BookingController extends Controller
 {
@@ -201,6 +203,16 @@ class BookingController extends Controller
         $booking->update(['payment_proof' => $path]);
 
         return back()->with('success', 'Bukti transfer berhasil diupload. Staf akan memverifikasi pembayaran Anda.');
+    }
+
+    public function viewPaymentProof(Request $request, Booking $booking): StreamedResponse
+    {
+        $user = $request->user();
+
+        abort_unless($booking->user_id === $user->id || in_array($user->role, ['staff', 'admin'], true), 403);
+        abort_unless($booking->payment_proof && Storage::disk('public')->exists($booking->payment_proof), 404);
+
+        return Storage::disk('public')->response($booking->payment_proof);
     }
 
     private function availability(array $lines, string $start, string $end): array

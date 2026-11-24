@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="pineFavicon" x1="32" y1="3" x2="32" y2="56" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#47855a"/>
+      <stop offset="1" stop-color="#1d4529"/>
+    </linearGradient>
+  </defs>
+  <circle cx="49" cy="13.5" r="7.2" fill="#f5b63d"/>
+  <path d="M32 3 44.8 21H39.3L50.8 38H43.4L55.8 56H8.2L20.6 38H13.2L24.7 21H19.2Z" fill="url(#pineFavicon)"/>
+</svg>

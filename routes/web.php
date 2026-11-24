@@ -35,6 +35,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/reservasi/{booking}/batal', [BookingController::class, 'cancel'])->name('bookings.cancel');
         Route::post('/reservasi/{booking}/bukti-transfer', [BookingController::class, 'uploadPaymentProof'])->name('bookings.payment-proof');
     });
+
+    Route::get('/reservasi/{booking}/bukti-transfer', [BookingController::class, 'viewPaymentProof'])->name('bookings.payment-proof.show');
 });
 
 Route::prefix('staff')->name('staff.')->middleware(['auth', 'role:staff,admin'])->group(function () {

@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Rimba Sewa') | Rimba Sewa</title>
+    <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
+    <meta name="theme-color" content="#1e3a22">
     <link rel="preload" href="{{ asset('fonts/dm-sans-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="{{ asset('fonts/manrope-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
     <style>
@@ -53,17 +57,60 @@
           .mobile-sidebar-menu a:active{background:var(--line)}
           @media(max-width:768px){.wrap{width:calc(100% - 32px)}.topbar{height:auto;padding:14px 0}.nav{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px}.mobile-menu-btn{display:flex;align-items:center;justify-content:center;grid-column:1;border:0;background:none;padding:8px;cursor:pointer;color:var(--forest-dark);border-radius:6px;transition:background 0.2s}.mobile-menu-btn:active{background:var(--sand)}.brand{grid-column:2;padding:0;font-size:17px;text-align:left;font-weight:700}.brand small{font-size:9px;display:block;margin-top:2px}.nav-account-menu{grid-column:3}.nav-account{padding:6px;display:flex;align-items:center;gap:8px;border-radius:8px;transition:background 0.2s}.nav-account:hover{background:var(--sand)}.nav-account-copy{display:flex;flex-direction:column;line-height:1.3}.nav-account-copy strong{font-size:12px;margin:0;font-weight:600}.nav-account-copy small{font-size:10px;margin:0}.nav-avatar{width:36px;height:36px;font-size:13px;font-weight:600}.navlinks{display:none!important}.main{padding:0}.section-title{font-size:26px;margin-bottom:20px}.form-grid{grid-template-columns:1fr;gap:16px}.panel{padding:20px;border-radius:12px}.footer-content{grid-template-columns:1fr;gap:28px}.row.mobile-stack{flex-direction:column;align-items:flex-start;gap:12px}.flash{min-width:auto;max-width:calc(100% - 32px);top:80px;border-radius:10px}.errors{min-width:auto;max-width:calc(100% - 32px);top:80px;border-radius:10px}[style*="display:flex"][style*="justify-content:space-between"]{flex-direction:column;align-items:stretch!important;gap:12px}[style*="display:grid"][style*="grid-template-columns:1fr auto"]{grid-template-columns:1fr!important}[style*="display:grid"][style*="grid-template-columns:repeat(auto"]{grid-template-columns:1fr!important}.table-wrap{overflow-x:auto;min-width:100%;-webkit-overflow-scrolling:touch}table{min-width:max-content;white-space:nowrap;font-size:14px}[style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr!important}}
     </style>
+    <style>
+        .brand{display:inline-flex;align-items:center;gap:10px}
+        .brand-mark{width:42px;height:42px;flex:none}
+        .brand-mark-light{display:none}
+        .brand-text{display:block}
+        .footer .brand{color:#fff}
+        .footer .brand small{color:#9ca3af}
+        .mobile-sidebar{left:auto;right:-320px;width:min(320px,86vw);box-shadow:-4px 0 16px rgba(0,0,0,.1);transition:right .3s ease}
+        .mobile-sidebar.open{left:auto;right:0}
+        .mobile-sidebar-logo img{width:38px;height:38px;flex-shrink:0}
+        .mobile-sidebar-account{margin-top:auto;padding:18px 20px 24px;border-top:1px solid var(--line)}
+        .mobile-sidebar-user{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+        .mobile-sidebar-avatar{width:42px;height:42px;border-radius:50%;background:var(--forest);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex-shrink:0}
+        .mobile-sidebar-user-copy{min-width:0}
+        .mobile-sidebar-user-copy strong{display:block;font-size:15px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .mobile-sidebar-user-copy small{display:block;font-size:12px;color:var(--muted)}
+        .mobile-sidebar-account-actions{display:flex;gap:8px}
+        .mobile-sidebar-account-actions form{flex:1;display:flex;margin:0}
+        .mobile-sidebar-account-actions a,.mobile-sidebar-account-actions button{flex:1;display:flex;align-items:center;justify-content:center;padding:10px 12px;border-radius:8px;font:600 13px 'DM Sans',sans-serif;cursor:pointer;transition:background .2s}
+        .mobile-sidebar-account-actions a{background:var(--sand);color:var(--forest-dark);border:1px solid var(--line)}
+        .mobile-sidebar-account-actions a:hover{background:var(--line)}
+        .mobile-sidebar-account-actions button{width:100%;background:#fff;color:#b91c1c;border:1px solid #fecaca}
+        .mobile-sidebar-account-actions button:hover{background:#fef2f2}
+        body.home-page .topbar:not(.scrolled) .brand-mark-dark{display:none}
+        body.home-page .topbar:not(.scrolled) .brand-mark-light{display:block;filter:drop-shadow(0 1px 3px rgba(0,0,0,.4))}
+        body.home-page .topbar:not(.scrolled) .mobile-menu-btn{color:#fff;filter:drop-shadow(0 1px 4px rgba(0,0,0,.55))}
+        @media(max-width:768px){
+            .nav{grid-template-columns:1fr auto;grid-template-rows:auto}
+            .brand{grid-column:1;grid-row:1;gap:8px}
+            .nav-account-menu{display:none}
+            .mobile-menu-btn{grid-column:2;grid-row:1;justify-self:end;width:40px;height:40px}
+            .brand-mark{width:36px;height:36px}
+            .mobile-sidebar{right:-320px}
+            .mobile-sidebar.open{right:0}
+        }
+        @media(max-width:400px){
+            .nav{gap:8px}
+        }
+    </style>
     @stack('head')
 </head>
 <body class="@if (request()->routeIs('home')) home-page @endif">
 <header class="topbar">
     <nav class="nav" aria-label="Navigasi utama">
-        <button class="mobile-menu-btn" type="button" onclick="toggleMobileSidebar()" aria-label="Buka menu">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
+        <button class="mobile-menu-btn" type="button" onclick="toggleMobileSidebar()" aria-label="Buka menu" aria-controls="mobile-sidebar" aria-expanded="false">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M4 7h16M4 12h16M4 17h16"/>
             </svg>
         </button>
-        <a class="brand" href="{{ route('home') }}">Rimba Sewa<small>Peralatan perjalanan luar ruang</small></a>
+        <a class="brand" href="{{ route('home') }}">
+            <img class="brand-mark brand-mark-dark" src="{{ asset('images/logo-rimba-sewa.svg') }}" alt="" width="42" height="42">
+            <img class="brand-mark brand-mark-light" src="{{ asset('images/logo-rimba-sewa-light.svg') }}" alt="" width="42" height="42">
+            <span class="brand-text">Rimba Sewa<small>Peralatan perjalanan luar ruang</small></span>
+        </a>
         <div class="navlinks">
             <a href="{{ route('home') }}#alat">Alat sewa</a>
             @if (! auth()->check() || ! in_array(auth()->user()->role, ['admin', 'staff'], true))
@@ -122,9 +169,7 @@
 <aside class="mobile-sidebar" id="mobile-sidebar">
     <div class="mobile-sidebar-header">
         <div class="mobile-sidebar-logo">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-            </svg>
+            <img src="{{ asset('images/logo-rimba-sewa.svg') }}" alt="" width="38" height="38">
             <span>Rimba Sewa</span>
         </div>
         <button class="mobile-sidebar-close" onclick="closeMobileSidebar()" aria-label="Tutup menu">
@@ -181,6 +226,24 @@
             </a>
         @endauth
     </nav>
+    @auth
+        <div class="mobile-sidebar-account">
+            <div class="mobile-sidebar-user">
+                <span class="mobile-sidebar-avatar" aria-hidden="true">{{ mb_strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}</span>
+                <span class="mobile-sidebar-user-copy">
+                    <strong>{{ auth()->user()->name }}</strong>
+                    <small>Masuk sebagai {{ $accountRoleLabel }}</small>
+                </span>
+            </div>
+            <div class="mobile-sidebar-account-actions">
+                <a href="{{ route('profile') }}" onclick="closeMobileSidebar()">Profil</a>
+                <form method="post" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit">Keluar</button>
+                </form>
+            </div>
+        </div>
+    @endauth
 </aside>
 <main class="main">
     @if (session('success'))<div class="wrap"><div class="flash" role="status">{{ session('success') }}</div></div>@endif
@@ -190,7 +253,10 @@
 <footer class="footer"><div class="wrap">
     <div class="footer-content">
         <div>
-            <a class="brand" href="{{ route('home') }}" style="display:block;margin-bottom:16px;font-size:24px">Rimba Sewa<small>Peralatan camping terlengkap</small></a>
+            <a class="brand" href="{{ route('home') }}" style="margin-bottom:16px;font-size:24px">
+                <img class="brand-mark" src="{{ asset('images/logo-rimba-sewa-light.svg') }}" alt="" width="46" height="46" style="width:46px;height:46px">
+                <span class="brand-text">Rimba Sewa<small>Peralatan camping terlengkap</small></span>
+            </a>
             <p style="color:#9ca3af;font-size:14px;line-height:1.6;margin:0 0 16px;max-width:300px">Sewa perlengkapan camping berkualitas untuk petualangan outdoor Anda.</p>
             <p style="color:#9ca3af;font-size:13px">Setiap hari, 09:00 - 20:00 WIB</p>
         </div>
@@ -254,8 +320,8 @@ document.addEventListener('DOMContentLoaded',function(){const topbar=document.qu
 <script>
 function closeAccountMenu(){document.querySelectorAll('.nav-account-menu').forEach(function(menu){var button=menu.querySelector('.nav-account');var dropdown=menu.querySelector('.nav-account-dropdown');if(button){button.setAttribute('aria-expanded','false')}if(dropdown){dropdown.hidden=true}})}
 function toggleAccountMenu(button){var menu=button.closest('.nav-account-menu');var dropdown=menu.querySelector('.nav-account-dropdown');var willOpen=dropdown.hidden;closeAccountMenu();if(willOpen){dropdown.hidden=false;button.setAttribute('aria-expanded','true')}}
-function toggleMobileSidebar(){var sidebar=document.getElementById('mobile-sidebar');var overlay=document.getElementById('mobile-sidebar-overlay');if(sidebar&&overlay){sidebar.classList.toggle('open');overlay.classList.toggle('open')}}
-function closeMobileSidebar(){var sidebar=document.getElementById('mobile-sidebar');var overlay=document.getElementById('mobile-sidebar-overlay');if(sidebar&&overlay){sidebar.classList.remove('open');overlay.classList.remove('open')}}
+function toggleMobileSidebar(){var sidebar=document.getElementById('mobile-sidebar');var overlay=document.getElementById('mobile-sidebar-overlay');if(sidebar&&overlay){var isOpen=sidebar.classList.toggle('open');overlay.classList.toggle('open',isOpen);var button=document.querySelector('.mobile-menu-btn');if(button){button.setAttribute('aria-expanded',isOpen?'true':'false')}}}
+function closeMobileSidebar(){var sidebar=document.getElementById('mobile-sidebar');var overlay=document.getElementById('mobile-sidebar-overlay');if(sidebar&&overlay){sidebar.classList.remove('open');overlay.classList.remove('open');var button=document.querySelector('.mobile-menu-btn');if(button){button.setAttribute('aria-expanded','false')}}}
 document.addEventListener('click',function(event){if(!event.target.closest('.nav-account-menu')){closeAccountMenu()}});
 document.addEventListener('keydown',function(event){if(event.key==='Escape'){closeAccountMenu();closeMobileSidebar()}});;
 </script>

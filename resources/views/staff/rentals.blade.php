@@ -22,15 +22,21 @@
                 <h2 style="font:700 21px Manrope,sans-serif;margin:0">Kelola reservasi & transaksi</h2>
                 <p class="small-note">Tinjau, setujui, dan kelola semua permintaan reservasi.</p>
             </div>
-            <div>
-                <label for="filter-status" class="small-note" style="display:block;margin-bottom:4px">Filter status</label>
-                <select id="filter-status" onchange="filterTransactions(this.value)" style="padding:8px 12px;border:1px solid var(--line);border-radius:6px;min-width:200px">
-                    <option value="all">Semua transaksi</option>
-                    <option value="pending">Menunggu keputusan</option>
-                    <option value="approved">Disetujui</option>
-                    <option value="rejected">Ditolak</option>
-                    <option value="cancelled">Dibatalkan</option>
-                </select>
+            <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
+                <div>
+                    <label for="search-booking" class="small-note" style="display:block;margin-bottom:4px">Cari kode / penyewa</label>
+                    <input id="search-booking" type="search" placeholder="Contoh: CAMP-XXXXXXXX" autocomplete="off" oninput="filterTransactions()" style="padding:8px 12px;border:1px solid var(--line);border-radius:6px;min-width:220px">
+                </div>
+                <div>
+                    <label for="filter-status" class="small-note" style="display:block;margin-bottom:4px">Filter status</label>
+                    <select id="filter-status" onchange="filterTransactions()" style="padding:8px 12px;border:1px solid var(--line);border-radius:6px;min-width:200px">
+                        <option value="all">Semua transaksi</option>
+                        <option value="pending">Menunggu keputusan</option>
+                        <option value="approved">Disetujui</option>
+                        <option value="rejected">Ditolak</option>
+                        <option value="cancelled">Dibatalkan</option>
+                    </select>
+                </div>
             </div>
         </div>
 
@@ -57,13 +63,13 @@
                     </thead>
                     <tbody id="transactions-table">
                         @foreach($allTransactions as $transaction)
-                            <tr data-status="{{ $transaction->status }}" data-pending="{{ $transaction->status === 'pending' || $transaction->cancellation_requested_at ? 'true' : 'false' }}" style="border-top:1px solid var(--line)">
+                            <tr data-status="{{ $transaction->status }}" data-pending="{{ $transaction->status === 'pending' || $transaction->cancellation_requested_at ? 'true' : 'false' }}" data-search="{{ strtolower($transaction->booking_code.' '.$transaction->user->name) }}" style="border-top:1px solid var(--line)">
                                 <td style="padding:16px 20px;font-weight:600;color:var(--forest-dark);border:none;font-size:15px">{{ $transaction->booking_code }}</td>
                                 <td style="padding:16px 20px;color:var(--ink);border:none;font-size:14px">{{ $transaction->user->name }}</td>
                                 <td style="padding:16px 20px;color:var(--muted);border:none;font-size:14px">
                                     {{ $transaction->start_date->format('d/m/Y') }}<br>sampai {{ $transaction->end_date->format('d/m/Y') }}
                                     @if($transaction->payment_proof)
-                                        <br><a href="{{ asset('storage/'.$transaction->payment_proof) }}" target="_blank" style="display:inline-flex;align-items:center;gap:4px;margin-top:8px;padding:6px 12px;background:#dcfce7;color:#065f46;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600;border:1px solid #bbf7d0">
+                                        <br><a href="{{ route('bookings.payment-proof.show', $transaction) }}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;margin-top:8px;padding:6px 12px;background:#dcfce7;color:#065f46;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600;border:1px solid #bbf7d0">
                                             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                             </svg>
@@ -108,6 +114,7 @@
                     </tbody>
                 </table>
             </div>
+            <p class="panel empty" id="transactions-empty" style="margin-top:16px" hidden>Tidak ada transaksi yang cocok dengan pencarian atau filter.</p>
         @endif
     </section>
 
@@ -184,7 +191,7 @@
                         @if($booking->payment_proof)
                             <div style="margin-bottom:12px;padding:12px;background:#dcfce7;border:1px solid #bbf7d0;border-radius:6px">
                                 <p style="font-size:11px;color:#065f46;margin:0 0 8px;font-weight:600">✓ Bukti Transfer Tersedia</p>
-                                <a href="{{ asset('storage/'.$booking->payment_proof) }}" target="_blank" class="button secondary small" style="width:100%;justify-content:center;display:flex;align-items:center;gap:6px;font-size:12px">
+                                <a href="{{ route('bookings.payment-proof.show', $booking) }}" target="_blank" rel="noopener" class="button secondary small" style="width:100%;justify-content:center;display:flex;align-items:center;gap:6px;font-size:12px">
                                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
@@ -401,20 +408,26 @@ function updateStatusBadge(formElement, type) {
     }
 }
 
-function filterTransactions(status) {
-    const rows = document.querySelectorAll('#transactions-table tr');
-    rows.forEach(row => {
+function filterTransactions() {
+    const statusField = document.getElementById('filter-status');
+    const searchField = document.getElementById('search-booking');
+    const status = statusField ? statusField.value : 'all';
+    const term = (searchField ? searchField.value : '').trim().toLowerCase();
+    let visible = 0;
+
+    document.querySelectorAll('#transactions-table tr').forEach(row => {
         const rowStatus = row.getAttribute('data-status');
         const isPending = row.getAttribute('data-pending') === 'true';
-        
-        if (status === 'all') {
-            row.style.display = '';
-        } else if (status === 'pending') {
-            row.style.display = isPending ? '' : 'none';
-        } else {
-            row.style.display = rowStatus === status ? '' : 'none';
-        }
+        const statusMatch = status === 'all' || (status === 'pending' ? isPending : rowStatus === status);
+        const searchMatch = !term || (row.getAttribute('data-search') || '').includes(term);
+        const show = statusMatch && searchMatch;
+
+        row.style.display = show ? '' : 'none';
+        if (show) visible++;
     });
+
+    const empty = document.getElementById('transactions-empty');
+    if (empty) empty.hidden = visible > 0;
 }
 </script>
 @endpush

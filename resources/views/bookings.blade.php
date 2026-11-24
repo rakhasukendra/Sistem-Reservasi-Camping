@@ -12,9 +12,17 @@
 @if($bookings->isEmpty())
     <div class="panel empty">Belum ada reservasi. Pilih alat dan tanggal perjalanan untuk mengajukan penyewaan.</div>
 @else
+    <div class="panel" style="padding:16px;margin-bottom:16px">
+        <div class="field" style="margin:0">
+            <label for="booking-search">Cari kode peminjaman</label>
+            <input id="booking-search" type="search" placeholder="Contoh: CAMP-XXXXXXXX, nama alat, atau kontak" autocomplete="off">
+        </div>
+        <p class="small-note" style="margin:8px 0 0">Ketik kode booking untuk menyaring kartu reservasi di bawah.</p>
+    </div>
+    <p class="panel empty" id="booking-search-empty" hidden>Tidak ada reservasi yang cocok dengan pencarian.</p>
     <div class="stack">
         @foreach($bookings as $booking)
-            <article id="booking-{{ $booking->id }}" class="panel" style="border-left:4px solid {{ $booking->status === 'pending' ? 'var(--warning)' : ($booking->status === 'approved' ? 'var(--success)' : 'var(--muted)') }};padding:20px">
+            <article id="booking-{{ $booking->id }}" class="panel booking-card" data-search="{{ strtolower($booking->booking_code.' '.$booking->contact_name.' '.$booking->contact.' '.$booking->items->pluck('name')->implode(' ')) }}" style="border-left:4px solid {{ $booking->status === 'pending' ? 'var(--warning)' : ($booking->status === 'approved' ? 'var(--success)' : 'var(--muted)') }};padding:20px">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
                     <div>
                         <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
@@ -82,7 +90,7 @@
                 @if($booking->payment_proof)
                     <div style="margin:12px 0;padding:14px;background:#dcfce7;border:1px solid #bbf7d0;border-radius:8px;border-left:4px solid #10b981">
                         <p class="small-note" style="margin:0 0 6px;font-weight:600;color:#065f46">✓ Bukti transfer sudah diupload</p>
-                        <a href="{{ asset('storage/'.$booking->payment_proof) }}" target="_blank" style="color:#065f46;font-size:14px;text-decoration:underline">Lihat bukti transfer</a>
+                        <a href="{{ route('bookings.payment-proof.show', $booking) }}" target="_blank" rel="noopener" style="color:#065f46;font-size:14px;text-decoration:underline">Lihat bukti transfer</a>
                     </div>
                 @endif
                 
@@ -217,6 +225,26 @@
 
 @push('scripts')
 <script>
+(function () {
+    const input = document.getElementById('booking-search');
+    if (!input) return;
+    const cards = Array.from(document.querySelectorAll('.booking-card'));
+    const empty = document.getElementById('booking-search-empty');
+
+    input.addEventListener('input', function () {
+        const term = input.value.trim().toLowerCase();
+        let visible = 0;
+
+        cards.forEach(function (card) {
+            const match = !term || (card.getAttribute('data-search') || '').includes(term);
+            card.style.display = match ? '' : 'none';
+            if (match) visible++;
+        });
+
+        if (empty) empty.hidden = !term || visible > 0;
+    });
+})();
+
 function updateCountdown(element) {
     const deadline = new Date(element.getAttribute('data-countdown')).getTime();
     
