@@ -74,7 +74,7 @@
                 @endif
 
                 @if($booking->status === 'pending' && !$booking->payment_proof && $booking->payment_due_at && now()->lt($booking->payment_due_at))
-                    <details style="margin-top:14px;border:2px solid var(--forest);border-radius:8px;overflow:hidden">
+                    <details id="payment-upload-{{ $booking->id }}" style="margin-top:14px;border:2px solid var(--forest);border-radius:8px;overflow:hidden">
                         <summary style="cursor:pointer;padding:12px 16px;font-weight:600;background:var(--sand);color:var(--forest-dark)">Upload Bukti Transfer</summary>
                         <form class="stack" method="post" action="{{ route('bookings.payment-proof',$booking) }}" enctype="multipart/form-data" style="margin:0;padding:16px;background:white">
                             @csrf
@@ -152,15 +152,16 @@
 @endif
 @if(session('show_payment_reminder'))
     @php
-        $latestPendingBooking = $bookings->firstWhere('status', 'pending');
+        $latestPendingBooking = $bookings->firstWhere('id', session('booking_id'))
+            ?? $bookings->firstWhere('status', 'pending');
     @endphp
-    @if($latestPendingBooking && !$latestPendingBooking->payment_proof)
+    @if($latestPendingBooking && $latestPendingBooking->status === 'pending' && !$latestPendingBooking->payment_proof && $latestPendingBooking->payment_due_at && now()->lt($latestPendingBooking->payment_due_at))
         <div id="payment-reminder" style="position:fixed;bottom:24px;right:24px;background:#fef3c7;border:2px solid #f59e0b;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,0.1);padding:20px;max-width:360px;z-index:9999;animation:slideIn 0.3s ease">
             <div style="display:flex;justify-content:space-between;align-items:start">
                 <div>
                     <p style="margin:0 0 8px;font-weight:700;color:#92400e">📝 Silakan Upload Bukti Transfer</p>
                     <p style="margin:0 0 12px;font-size:13px;color:#92400e">Upload bukti transfer untuk memverifikasi pembayaran Anda. Waktu tersisa: <strong id="countdown-text" style="font-size:16px">10:00</strong></p>
-                    <a href="{{ route('bookings.index') }}#booking-{{ $latestPendingBooking->id }}" style="display:inline-block;padding:8px 16px;background:#f59e0b;color:white;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600">Upload Sekarang</a>
+                    <a href="#payment-upload-{{ $latestPendingBooking->id }}" onclick="openPaymentUpload(event, {{ $latestPendingBooking->id }})" style="display:inline-block;padding:8px 16px;background:#f59e0b;color:white;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600">Upload Sekarang</a>
                 </div>
                 <button type="button" onclick="closePaymentReminder()" style="background:none;border:none;cursor:pointer;color:#92400e;font-size:20px;line-height:1">✕</button>
             </div>
@@ -179,6 +180,24 @@
             document.getElementById('payment-reminder').style.display = 'none';
             // Mark popup as closed in localStorage
             localStorage.setItem('paymentReminderClosed', 'true');
+        }
+
+        function openPaymentUpload(event, bookingId) {
+            if (event) event.preventDefault();
+
+            const panel = document.getElementById('payment-upload-' + bookingId);
+            if (!panel) return;
+
+            panel.open = true;
+            closePaymentReminder();
+            panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            const input = panel.querySelector('input[type="file"]');
+            if (input) {
+                setTimeout(function () {
+                    input.focus({ preventScroll: true });
+                }, 400);
+            }
         }
         
         // Don't show popup if closed

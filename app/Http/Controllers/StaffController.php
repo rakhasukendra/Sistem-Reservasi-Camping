@@ -103,7 +103,7 @@ class StaffController extends Controller
     {
         abort_unless(! $booking->pickup_verified, 422, 'Status reservasi tidak dapat diubah setelah pengambilan dicatat.');
 
-        $data = $request->validate(['decision' => ['required', Rule::in(['approved', 'rejected', 'pending'])], 'reason' => ['nullable', 'string', 'max:1000']]);
+        $data = $request->validate(['decision' => ['required', Rule::in(['approved', 'rejected'])], 'reason' => ['nullable', 'string', 'max:1000']]);
 
         if ($data['decision'] === 'rejected' && empty($data['reason'])) {
             return back()->withErrors(['reason' => 'Tuliskan alasan penolakan atau catatan pembatalan.']);

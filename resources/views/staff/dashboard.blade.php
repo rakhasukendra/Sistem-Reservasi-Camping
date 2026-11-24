@@ -1,5 +1,17 @@
 @extends('layouts.app')
 @section('title', 'Panel staf')
+
+@push('head')
+<style>
+    .verify-dropdown summary{list-style:none;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+    .verify-dropdown summary::-webkit-details-marker{display:none}
+    .verify-dropdown summary svg{color:var(--forest);transition:transform .2s}
+    .verify-dropdown[open] summary svg{transform:rotate(180deg)}
+    .verify-dropdown-menu{margin-top:8px;padding:10px;background:var(--sand);border:1px solid var(--line);border-radius:6px}
+    .verify-dropdown-menu form{margin:0}
+    .verify-dropdown-menu .button{width:100%;display:flex;justify-content:center;padding:8px 10px;font-size:12px}
+</style>
+@endpush
 @section('content')
 <div class="wrap" style="padding-top:100px;padding-bottom:60px">
     <div class="page-head row mobile-stack">
@@ -153,65 +165,56 @@
 
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:12px">
                             <div>
-                                <p style="font-size:11px;color:var(--muted);margin:0 0 4px">Kontak</p>
-                                <span style="display:inline-block;padding:4px 8px;background:{{ $booking->contact_verified ? 'var(--success)' : 'var(--warning)' }};color:white;border-radius:4px;font-size:11px;font-weight:700">
-                                    {{ $booking->contact_verified ? '✓ Terverifikasi' : 'Belum' }}
-                                </span>
-                            </div>
-                            <div>
-                                <p style="font-size:11px;color:var(--muted);margin:0 0 4px">Pengambilan</p>
-                                <span style="display:inline-block;padding:4px 8px;background:{{ $booking->pickup_verified ? 'var(--success)' : 'var(--warning)' }};color:white;border-radius:4px;font-size:11px;font-weight:700">
-                                    {{ $booking->pickup_verified ? '✓ Dicatat' : 'Belum' }}
-                                </span>
-                            </div>
-                        </div>
-
-                        <div style="display:flex;gap:8px;flex-wrap:wrap">
-                            @if(!$booking->contact_verified)
-                                <form method="post" action="{{ route('staff.bookings.verify', $booking) }}">
-                                    @csrf
-                                    <button class="button small" type="submit" style="font-size:12px;padding:8px 12px">Verifikasi kontak</button>
-                                </form>
-                            @endif
-
-                            @if(!$booking->pickup_verified)
-                                <form method="post" action="{{ route('staff.bookings.pickup', $booking) }}">
-                                    @csrf
-                                    <button class="button small" type="submit" style="font-size:12px;padding:8px 12px">Catat pengambilan</button>
-                                </form>
-                            @endif
-                        </div>
-
-                        @if($booking->contact_verified || $booking->pickup_verified)
-                            @php
-                                $verifiedStates = collect([
-                                    $booking->contact_verified ? 'Kontak terverifikasi' : null,
-                                    $booking->pickup_verified ? 'Pengambilan tercatat' : null,
-                                ])->filter()->implode(', ');
-                            @endphp
-                            <details style="margin-top:12px">
-                                <summary style="font-size:13px;cursor:pointer;color:var(--forest);font-weight:600">Edit Status Verifikasi</summary>
-                                <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)">
-                                    <p class="small-note" style="margin-bottom:12px">Status saat ini: {{ $verifiedStates }}</p>
-                                    <div style="display:flex;gap:8px;flex-wrap:wrap">
-                                        @if($booking->contact_verified)
+                                <p style="font-size:11px;color:var(--muted);margin:0 0 6px">Kontak</p>
+                                <details class="verify-dropdown">
+                                    <summary>
+                                        <span style="display:inline-block;padding:4px 8px;background:{{ $booking->contact_verified ? 'var(--success)' : 'var(--warning)' }};color:white;border-radius:4px;font-size:11px;font-weight:700">
+                                            {{ $booking->contact_verified ? '✓ Terverifikasi' : 'Belum' }}
+                                        </span>
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                                    </summary>
+                                    <div class="verify-dropdown-menu">
+                                        @if(!$booking->contact_verified)
+                                            <form method="post" action="{{ route('staff.bookings.verify', $booking) }}">
+                                                @csrf
+                                                <button class="button small" type="submit">Verifikasi kontak</button>
+                                            </form>
+                                        @else
                                             <form method="post" action="{{ route('staff.bookings.verify', $booking) }}">
                                                 @csrf
                                                 <input type="hidden" name="reset" value="1">
-                                                <button class="button secondary small" type="submit">Reset verifikasi kontak</button>
-                                            </form>
-                                        @endif
-                                        @if($booking->pickup_verified)
-                                            <form method="post" action="{{ route('staff.bookings.pickup', $booking) }}">
-                                                @csrf
-                                                <input type="hidden" name="reset" value="1">
-                                                <button class="button secondary small" type="submit">Reset catatan pengambilan</button>
+                                                <button class="button small" type="submit" style="background:#dc2626;border-color:#dc2626">Reset verifikasi kontak</button>
                                             </form>
                                         @endif
                                     </div>
-                                </div>
-                            </details>
-                        @endif
+                                </details>
+                            </div>
+                            <div>
+                                <p style="font-size:11px;color:var(--muted);margin:0 0 6px">Pengambilan</p>
+                                <details class="verify-dropdown">
+                                    <summary>
+                                        <span style="display:inline-block;padding:4px 8px;background:{{ $booking->pickup_verified ? 'var(--success)' : 'var(--warning)' }};color:white;border-radius:4px;font-size:11px;font-weight:700">
+                                            {{ $booking->pickup_verified ? '✓ Dicatat' : 'Belum' }}
+                                        </span>
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                                    </summary>
+                                    <div class="verify-dropdown-menu">
+                                        @if(!$booking->pickup_verified)
+                                            <form method="post" action="{{ route('staff.bookings.pickup', $booking) }}">
+                                                @csrf
+                                                <button class="button small" type="submit">Catat pengambilan</button>
+                                            </form>
+                                        @else
+                                            <form method="post" action="{{ route('staff.bookings.pickup', $booking) }}">
+                                                @csrf
+                                                <input type="hidden" name="reset" value="1">
+                                                <button class="button small" type="submit" style="background:#dc2626;border-color:#dc2626">Reset catatan pengambilan</button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </details>
+                            </div>
+                        </div>
 
                         @if($booking->contact_verified && $booking->pickup_verified)
                             @if($booking->return_condition === 'not_returned')
@@ -324,7 +327,6 @@
                                                 <select id="status-{{ $transaction->id }}" name="decision" style="padding:8px;border:1px solid var(--line);border-radius:4px;width:100%">
                                                     <option value="approved" @selected($transaction->status === 'approved')>Approved</option>
                                                     <option value="rejected" @selected($transaction->status === 'rejected')>Rejected</option>
-                                                    <option value="pending" @selected($transaction->status === 'pending')>Pending</option>
                                                 </select>
                                             </div>
                                             <div class="field" style="margin-bottom:10px">

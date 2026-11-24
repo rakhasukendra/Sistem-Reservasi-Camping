@@ -599,8 +599,7 @@ class ReservationFlowTest extends TestCase
         $this->assertDatabaseHas('audit_logs', ['actor_id' => $staff->id, 'action' => 'booking.contact_reset', 'details' => 'Verifikasi kontak dibatalkan untuk CAMP-RESET01']);
 
         $this->actingAs($staff)->get('/staff/sewa')->assertOk()
-            ->assertSee('Edit Status Verifikasi')
-            ->assertSee('Status saat ini: Pengambilan tercatat')
+            ->assertSee('Verifikasi kontak')
             ->assertDontSee('Reset verifikasi kontak')
             ->assertSee('Reset catatan pengambilan');
 
@@ -613,7 +612,9 @@ class ReservationFlowTest extends TestCase
         $this->assertDatabaseHas('audit_logs', ['actor_id' => $staff->id, 'action' => 'booking.pickup_reset', 'details' => 'Catatan pengambilan dibatalkan untuk CAMP-RESET01']);
 
         $this->actingAs($staff)->get('/staff/sewa')->assertOk()
-            ->assertDontSee('Edit Status Verifikasi')
+            ->assertSee('Verifikasi kontak')
+            ->assertSee('Catat pengambilan')
+            ->assertDontSee('Reset verifikasi kontak')
             ->assertDontSee('Reset catatan pengambilan');
     }
 
@@ -824,5 +825,41 @@ class ReservationFlowTest extends TestCase
         $this->assertDatabaseHas('bookings', ['id' => $booking->id, 'status' => 'approved']);
         $this->assertDatabaseHas('audit_logs', ['actor_id' => $staff->id, 'action' => 'booking.approved']);
         $this->actingAs($user)->put('/admin/akun/'.$staff->id, ['role' => 'admin'])->assertForbidden();
+    }
+
+    public function test_staff_can_change_an_approved_booking_status_again(): void
+    {
+        $renter = User::where('email', 'user@demo.test')->firstOrFail();
+        $staff = User::where('email', 'staff@demo.test')->firstOrFail();
+        $booking = Booking::create([
+            'user_id' => $renter->id,
+            'booking_code' => 'CAMP-STATUS-CHANGE',
+            'start_date' => Carbon::today()->addDays(5),
+            'end_date' => Carbon::today()->addDays(7),
+            'status' => 'approved',
+            'contact_name' => $renter->name,
+            'contact' => $renter->email,
+            'total' => 0,
+            'contact_verified' => true,
+        ]);
+
+        $this->actingAs($staff)->get('/staff/sewa')->assertOk()
+            ->assertSee('CAMP-STATUS-CHANGE')
+            ->assertDontSee('>Pending</option>', false);
+
+        $this->actingAs($staff)->post('/staff/reservasi/'.$booking->id.'/keputusan', [
+            'decision' => 'rejected',
+            'reason' => 'Pembayaran tidak sesuai.',
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('bookings', [
+            'id' => $booking->id,
+            'status' => 'rejected',
+            'contact_verified' => false,
+        ]);
+        $this->assertDatabaseHas('audit_logs', [
+            'actor_id' => $staff->id,
+            'action' => 'booking.rejected',
+        ]);
     }
 }
