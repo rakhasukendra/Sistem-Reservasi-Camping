@@ -22,12 +22,12 @@
     <p class="panel empty" id="booking-search-empty" hidden>Tidak ada reservasi yang cocok dengan pencarian.</p>
     <div class="stack">
         @foreach($bookings as $booking)
-            <article id="booking-{{ $booking->id }}" class="panel booking-card" data-search="{{ strtolower($booking->booking_code.' '.$booking->contact_name.' '.$booking->contact.' '.$booking->items->pluck('name')->implode(' ')) }}" style="border-left:4px solid {{ $booking->status === 'pending' ? 'var(--warning)' : ($booking->status === 'approved' ? 'var(--success)' : 'var(--muted)') }};padding:20px">
+            <article id="booking-{{ $booking->id }}" class="panel booking-card" data-search="{{ strtolower($booking->booking_code.' '.$booking->contact_name.' '.$booking->contact.' '.$booking->items->pluck('name')->implode(' ')) }}" style="border-left:4px solid {{ $booking->display_status_class === 'pending' ? 'var(--warning)' : ($booking->display_status_class === 'approved' ? 'var(--success)' : ($booking->display_status_class === 'rejected' ? 'var(--error)' : 'var(--muted)')) }};padding:20px">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
                     <div>
                         <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
                             <span style="font:700 18px Manrope,sans-serif;color:var(--forest-dark)">{{ $booking->booking_code }}</span>
-                            <span class="status {{ $booking->status }}" style="font-size:11px">{{ strtoupper($booking->status) }}</span>
+                            <span class="status {{ $booking->display_status_class }}" style="font-size:11px">{{ strtoupper($booking->status_label) }}</span>
                         </div>
                         <p class="small-note" style="margin:0">{{ $booking->start_date->format('d M Y') }} - {{ $booking->end_date->format('d M Y') }}</p>
                     </div>
@@ -109,15 +109,21 @@
                     </div>
                 @endif
                 
-                @if($booking->cancellation_requested_at && $booking->cancellation_review_note)
-                    <div style="margin:12px 0;padding:14px;background:{{ strpos($booking->cancellation_review_note, 'ditolak') ? '#fee2e2' : '#dcfce7' }};border:1px solid {{ strpos($booking->cancellation_review_note, 'ditolak') ? '#fecaca' : '#bbf7d0' }};border-radius:8px;border-left:4px solid {{ strpos($booking->cancellation_review_note, 'ditolak') ? '#dc2626' : '#10b981' }}">
-                        <p class="small-note" style="margin:0 0 6px;font-weight:600;color:{{ strpos($booking->cancellation_review_note, 'ditolak') ? '#7f1d1d' : '#065f46' }}">Review staf:</p>
-                        <p style="margin:0;color:{{ strpos($booking->cancellation_review_note, 'ditolak') ? '#7f1d1d' : '#065f46' }};font-size:14px">{{ $booking->cancellation_review_note }}</p>
-                    </div>
-                @elseif($booking->cancellation_requested_at && !$booking->cancellation_review_note)
+                @if($booking->cancellation_status === 'requested')
                     <div style="margin:12px 0;padding:14px;background:#dbeafe;border:1px solid #bfdbfe;border-radius:8px;border-left:4px solid #3b82f6">
-                        <p class="small-note" style="margin:0 0 6px;font-weight:600;color:#1e3a8a">Status:</p>
-                        <p style="margin:0;color:#1e3a8a;font-size:14px">Ajuan pembatalan menunggu keputusan staf ({{ $booking->cancellation_requested_at->format('d/m/Y H:i') }})</p>
+                        <p class="small-note" style="margin:0 0 6px;font-weight:600;color:#1e3a8a">Ajuan pembatalan dikirim</p>
+                        <p style="margin:0;color:#1e3a8a;font-size:14px">Menunggu keputusan staf ({{ $booking->cancellation_requested_at?->format('d/m/Y H:i') }}). Reservasi masih berjalan sampai pembatalan disetujui.</p>
+                    </div>
+                @elseif($booking->cancellation_status === 'approved')
+                    <div style="margin:12px 0;padding:14px;background:#dcfce7;border:1px solid #bbf7d0;border-radius:8px;border-left:4px solid #10b981">
+                        <p class="small-note" style="margin:0 0 6px;font-weight:600;color:#065f46">✓ Pembatalan disetujui staf</p>
+                        <p style="margin:0;color:#065f46;font-size:14px">{{ $booking->cancellation_review_note }}</p>
+                    </div>
+                @elseif($booking->cancellation_status === 'rejected')
+                    <div style="margin:12px 0;padding:14px;background:#fee2e2;border:1px solid #fecaca;border-radius:8px;border-left:4px solid #dc2626">
+                        <p class="small-note" style="margin:0 0 6px;font-weight:600;color:#7f1d1d">✕ Ajuan pembatalan ditolak staf</p>
+                        <p style="margin:0;color:#7f1d1d;font-size:14px">{{ $booking->cancellation_review_note }}</p>
+                        <p class="small-note" style="margin:6px 0 0;color:#7f1d1d">Reservasi tetap berjalan sesuai jadwal.</p>
                     </div>
                 @endif
                 
@@ -133,7 +139,7 @@
                     <p class="small-note" style="margin:8px 0">Kondisi kembali: {{ $booking->return_condition }}. Penggantian: Rp{{ number_format($booking->replacement_amount,0,',','.') }}. Status: {{ $booking->replacement_paid ? '✓ Tercatat' : '— Belum' }}</p>
                 @endif
                 
-                @if(in_array($booking->status,['pending','approved'],true) && !$booking->cancellation_requested_at && !$booking->pickup_verified)
+                @if(in_array($booking->status,['pending','approved'],true) && $booking->cancellation_status !== 'requested' && !$booking->pickup_verified)
                     <details style="margin-top:14px">
                         <summary>Ajukan pembatalan</summary>
                         <form class="stack" method="post" action="{{ route('bookings.cancel',$booking) }}" style="margin-top:12px">

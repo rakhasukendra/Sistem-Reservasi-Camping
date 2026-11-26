@@ -465,15 +465,50 @@ class ReservationFlowTest extends TestCase
 
         $this->actingAs($staff)->post('/staff/reservasi/'.$booking->id.'/keputusan', [
             'decision' => 'rejected',
-            'reason' => 'Pembatalan disetujui',
+            'reason' => 'Pembatalan ditolak, rencana perjalanan tetap berjalan.',
         ])->assertRedirect();
         $this->assertDatabaseHas('bookings', ['id' => $booking->id, 'status' => 'approved']);
+        $this->assertDatabaseHas('bookings', ['id' => $booking->id, 'cancellation_status' => 'rejected']);
+        $this->actingAs($user)->get('/reservasi-saya')->assertOk()->assertSee('PEMBATALAN DITOLAK');
 
         $this->actingAs($user)->postJson('/ketersediaan', [
             'start_date' => $rentalStart->toDateString(),
             'end_date' => $rentalStart->copy()->addDays(2)->toDateString(),
             'items' => [['id' => $item->id, 'quantity' => 8]],
         ])->assertOk()->assertJsonPath('items.0.available', false)->assertJsonPath('items.0.remaining', 6);
+    }
+
+    public function test_staff_approval_of_cancellation_marks_booking_cancelled_and_records_review(): void
+    {
+        $user = User::where('email', 'user@demo.test')->firstOrFail();
+        $staff = User::where('email', 'staff@demo.test')->firstOrFail();
+        $item = CampingItem::where('name', 'Tenda Dome 4 Orang')->firstOrFail();
+        $start = Carbon::today()->addDays(3);
+        $booking = Booking::create([
+            'user_id' => $user->id,
+            'booking_code' => 'CAMP-CANCEL02',
+            'start_date' => $start,
+            'end_date' => $start->copy()->addDays(1),
+            'status' => 'approved',
+            'contact_name' => $user->name,
+            'contact' => $user->email,
+            'total' => $item->daily_rate,
+        ]);
+        $booking->items()->attach($item->id, ['quantity' => 1, 'unit_rate' => $item->daily_rate]);
+
+        $this->actingAs($user)->post('/reservasi/'.$booking->id.'/batal', ['cancel_reason' => 'Acara keluarga'])->assertRedirect();
+        $this->assertSame('requested', $booking->fresh()->cancellation_status);
+        $this->actingAs($user)->get('/reservasi-saya')->assertOk()->assertSee('Ajuan pembatalan dikirim');
+
+        $this->actingAs($staff)->post('/staff/reservasi/'.$booking->id.'/keputusan', [
+            'decision' => 'approved',
+            'reason' => 'Pembatalan disetujui, refund 100% dicatat.',
+        ])->assertRedirect();
+
+        $booking->refresh();
+        $this->assertSame('cancelled', $booking->status);
+        $this->assertSame('approved', $booking->cancellation_status);
+        $this->actingAs($user)->get('/reservasi-saya')->assertOk()->assertSee('Pembatalan disetujui staf', false);
     }
 
     public function test_staff_can_verify_contact_and_record_pickup_for_approved_bookings(): void

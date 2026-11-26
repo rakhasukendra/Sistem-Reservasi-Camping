@@ -47,6 +47,7 @@
                         <option value="approved">Disetujui</option>
                         <option value="rejected">Ditolak</option>
                         <option value="cancelled">Dibatalkan</option>
+                        <option value="cancellation_rejected">Pembatalan ditolak</option>
                     </select>
                 </div>
             </div>
@@ -75,7 +76,7 @@
                     </thead>
                     <tbody id="transactions-table">
                         @foreach($allTransactions as $transaction)
-                            <tr data-status="{{ $transaction->status }}" data-pending="{{ $transaction->status === 'pending' || $transaction->cancellation_requested_at ? 'true' : 'false' }}" data-search="{{ strtolower($transaction->booking_code.' '.$transaction->user->name) }}" style="border-top:1px solid var(--line)">
+                            <tr data-status="{{ $transaction->display_status }}" data-pending="{{ $transaction->status === 'pending' || $transaction->cancellation_status === 'requested' ? 'true' : 'false' }}" data-search="{{ strtolower($transaction->booking_code.' '.$transaction->user->name) }}" style="border-top:1px solid var(--line)">
                                 <td style="padding:16px 20px;font-weight:600;color:var(--forest-dark);border:none;font-size:15px">{{ $transaction->booking_code }}</td>
                                 <td style="padding:16px 20px;color:var(--ink);border:none;font-size:14px">{{ $transaction->user->name }}</td>
                                 <td style="padding:16px 20px;color:var(--muted);border:none;font-size:14px">
@@ -92,8 +93,8 @@
                                     @endif
                                 </td>
                                 <td style="padding:16px 20px;border:none">
-                                    <span class="status {{ $transaction->status }}" style="display:inline-block;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:700;text-transform:uppercase">
-                                        {{ $transaction->cancellation_requested_at ? 'pembatalan diminta' : $transaction->status }}
+                                    <span class="status {{ $transaction->display_status_class }}" style="display:inline-block;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:700;text-transform:uppercase">
+                                        {{ $transaction->status_label }}
                                     </span>
                                 </td>
                                 <td style="padding:16px 20px;font-weight:600;color:var(--forest-dark);border:none;font-size:15px">Rp{{ number_format($transaction->total,0,',','.') }}</td>
@@ -105,13 +106,19 @@
                                             <div class="field" style="margin-bottom:10px">
                                                 <label for="status-{{ $transaction->id }}" style="font-size:13px;font-weight:600">Status</label>
                                                 <select id="status-{{ $transaction->id }}" name="decision" style="padding:8px;border:1px solid var(--line);border-radius:4px;width:100%">
-                                                    <option value="approved" @selected($transaction->status === 'approved')>Approved</option>
-                                                    <option value="rejected" @selected($transaction->status === 'rejected')>Rejected</option>
+                                                    @if($transaction->cancellation_status === 'requested')
+                                                        <option value="" disabled selected>— Pilih keputusan pembatalan —</option>
+                                                        <option value="approved">Setujui pembatalan (batalkan reservasi)</option>
+                                                        <option value="rejected">Tolak ajuan pembatalan</option>
+                                                    @else
+                                                        <option value="approved" @selected($transaction->status === 'approved')>Approved</option>
+                                                        <option value="rejected" @selected($transaction->status === 'rejected')>Rejected</option>
+                                                    @endif
                                                 </select>
                                             </div>
                                             <div class="field" style="margin-bottom:10px">
                                                 <label for="note-{{ $transaction->id }}" style="font-size:13px;font-weight:600">Alasan/Catatan</label>
-                                                <textarea id="note-{{ $transaction->id }}" name="reason" maxlength="1000" style="padding:8px;border:1px solid var(--line);border-radius:4px;width:100%;min-height:60px" placeholder="Catatan perubahan status">{{ $transaction->cancel_reason ?? $transaction->cancellation_review_note }}</textarea>
+                                                <textarea id="note-{{ $transaction->id }}" name="reason" maxlength="1000" style="padding:8px;border:1px solid var(--line);border-radius:4px;width:100%;min-height:60px" placeholder="{{ $transaction->cancellation_status === 'requested' ? 'Catatan keputusan pembatalan' : 'Catatan perubahan status' }}">{{ $transaction->cancel_reason ?? $transaction->cancellation_review_note }}</textarea>
                                             </div>
                                             <div style="display:flex;gap:8px">
                                                 <button class="button small" type="submit">Simpan</button>

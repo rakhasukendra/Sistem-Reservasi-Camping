@@ -23,6 +23,12 @@ class CancelExpiredBookings extends Command
             $booking->update([
                 'status' => 'cancelled',
                 'cancel_reason' => 'Pembayaran tidak dilakukan dalam 10 menit. Pesanan dibatalkan otomatis oleh sistem.',
+                'cancellation_status' => null,
+                'cancellation_requested_at' => null,
+                'cancellation_review_note' => null,
+                'previous_booking_status' => null,
+                'refund_note' => null,
+                'deposit_note' => null,
             ]);
         }
 

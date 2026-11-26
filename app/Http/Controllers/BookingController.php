@@ -95,7 +95,7 @@ class BookingController extends Controller
     public function cancel(Request $request, Booking $booking): RedirectResponse
     {
         abort_unless($booking->user_id === $request->user()->id, 403);
-        if (! in_array($booking->status, ['pending', 'approved'], true) || $booking->cancellation_requested_at || $booking->pickup_verified) {
+        if (! in_array($booking->status, ['pending', 'approved'], true) || $booking->cancellation_status === 'requested' || $booking->pickup_verified) {
             return back()->withErrors(['booking' => 'Pembatalan sedang ditinjau, barang sudah diambil, atau reservasi ini tidak dapat dibatalkan.']);
         }
         $data = $request->validate(['cancel_reason' => ['required', 'string', 'max:1000']]);
@@ -103,7 +103,9 @@ class BookingController extends Controller
         $refundPercentage = now()->startOfDay()->lt($refundDate) ? 100 : 50;
         $booking->update([
             'previous_booking_status' => $booking->status,
+            'cancellation_status' => 'requested',
             'cancellation_requested_at' => now(),
+            'cancellation_review_note' => null,
             'cancel_reason' => $data['cancel_reason'],
             'refund_note' => "Hak refund {$refundPercentage}% dicatat jika staf menerima pembatalan, dana belum dikirim.",
             'deposit_note' => 'Catatan pengembalian deposit menunggu keputusan staf.',

@@ -72,7 +72,7 @@ class StaffController extends Controller
         $since = $period === 'year' ? now()->startOfYear() : now()->startOfMonth();
         $until = $period === 'year' ? now()->endOfYear() : now()->endOfMonth();
         $daily = Booking::query()->whereDate('start_date', '>=', $since)->whereDate('start_date', '<=', $until)
-            ->selectRaw('start_date, COUNT(*) as booking_count, SUM(CASE WHEN status = ? OR cancellation_requested_at IS NOT NULL THEN 1 ELSE 0 END) as cancellation_count, SUM(CASE WHEN status = ? THEN total ELSE 0 END) as revenue', ['cancelled', 'approved'])
+            ->selectRaw('start_date, COUNT(*) as booking_count, SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as cancellation_count, SUM(CASE WHEN status = ? THEN total ELSE 0 END) as revenue', ['cancelled', 'approved'])
             ->groupBy('start_date')->orderBy('start_date')->get();
         $chartMaximum = max(1, (int) $daily->max('booking_count'));
         $items = CampingItem::query()->orderBy('category')->get();
@@ -109,13 +109,14 @@ class StaffController extends Controller
             return back()->withErrors(['reason' => 'Tuliskan alasan penolakan atau catatan pembatalan.']);
         }
 
-        if ($booking->cancellation_requested_at) {
+        if ($booking->cancellation_status === 'requested') {
             abort_unless($booking->return_condition === 'not_returned', 422, 'Status reservasi tidak dapat diubah setelah kondisi pengembalian dicatat.');
             abort_unless(! $booking->pickup_verified, 422, 'Status reservasi tidak dapat diubah setelah pengambilan dicatat.');
 
             if ($data['decision'] === 'approved') {
                 $booking->update([
                     'status' => 'cancelled',
+                    'cancellation_status' => 'approved',
                     'cancellation_review_note' => ($data['reason'] ?? null) ?: 'Pembatalan disetujui oleh staf.',
                     'refund_note' => $booking->refund_note ?? 'Catatan refund diperbarui oleh staf.',
                     'deposit_note' => 'Pengembalian deposit dicatat untuk diperiksa staf.',
@@ -124,9 +125,13 @@ class StaffController extends Controller
             } else {
                 $booking->update([
                     'status' => $booking->previous_booking_status ?? 'approved',
+                    'cancellation_status' => 'rejected',
                     'cancellation_requested_at' => null,
                     'cancellation_review_note' => ($data['reason'] ?? null) ?: 'Ajuan pembatalan ditolak oleh staf.',
                     'cancel_reason' => null,
+                    'refund_note' => null,
+                    'deposit_note' => null,
+                    'previous_booking_status' => null,
                 ]);
                 $action = 'booking.cancellation_rejected';
             }
@@ -141,6 +146,10 @@ class StaffController extends Controller
                 'pickup_verified' => $pickupVerified,
                 'cancel_reason' => $cancelReason,
                 'refund_note' => $refundNote,
+                'cancellation_status' => null,
+                'cancellation_requested_at' => null,
+                'cancellation_review_note' => null,
+                'previous_booking_status' => null,
             ]);
             $action = 'booking.'.$data['decision'];
         }
